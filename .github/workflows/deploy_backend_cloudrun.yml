@@ -1,11 +1,11 @@
 name: Deploy to Cloud Run for Backend
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/**/*.go'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'backend/**/*.go'
 
 env:
   SERVICE_NAME: backend-service-for-migration

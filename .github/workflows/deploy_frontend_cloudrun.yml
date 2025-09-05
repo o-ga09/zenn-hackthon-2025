@@ -2,12 +2,12 @@ name: Deploy to Cloud Run for Frontend
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'frontend/**/*.ts'
-      - 'frontend/**/*.tsx'
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'frontend/**/*.ts'
+  #     - 'frontend/**/*.tsx'
 
 env:
   SERVICE_NAME: frontend-service
