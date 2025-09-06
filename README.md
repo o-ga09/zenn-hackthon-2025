@@ -1,4 +1,4 @@
-## 3rd Zenn AI Agent Hackthon 2025
+# 3rd Zenn AI Agent Hackthon 2025
 
 本リポジトリは、第３回 Zenn AI Agent Hackthon の提出用リポジトリです。
 
@@ -15,6 +15,22 @@
 | フロントエンド  | React           |
 | バックエンド    | Golang          |
 | AI エージェント | firebase genkit |
+| データベース | TiDB |
+| ユーザー認証    | Firebase Auth          |
+
+## フレームワーク
+
+- フロントエンド
+  - React
+- バックエンド
+  - Gin
+  - Gorm
+- AIエージェント
+  - Firebase Genkit
+
+## スタイリング
+
+- TailwindCSS
 
 ## 使用する AI
 
