@@ -7,15 +7,16 @@ applyTo: "**/*.tsx,**/*.ts,**/*.js,**/*.jsx"
 
 ## 技術スタック
 
-- **フレームワーク**: React 18 + TypeScript + Vite
+- **フレームワーク**: React 19 + TypeScript + Vite
 - **状態管理**: TanStack Query v5 (サーバー状態) + useState/useReducer (ローカル状態)
 - **スタイリング**: TailwindCSS v3 (モバイルファースト)
 - **ユーザー認証**: Firebase Auth
-- **API**: Orbal 自動生成クライアント (`src/utils/lib/api`)
-- **テスト**: Jest + React Testing Library
+- **データ管理**: Firestore + Firebase Storage
+- **テスト**: Vitest + React Testing Library
 - **計装**: OpenTelemetry
 - **AI 連携**: バックエンドの Firebase Genkit 経由で Vertex AI 利用
 - **ホスティング**: Google Cloud Run
+- **パッケージ管理**: pnpm を使用すること
 
 ## ディレクトリ構成
 
@@ -26,10 +27,7 @@ src/
 │   └── layout/       # レイアウトコンポーネント (Header, Footer, Sidebar)
 ├── pages/            # ページコンポーネント (React Router)
 ├── hooks/            # カスタムフック (useQuery, useMutation等)
-├── utils/
-│   ├── lib/
-│   │   └── api/      # Orbal自動生成APIクライアント
-│   └── helpers/      # ユーティリティ関数
+├── utils/            # ユーティリティ関数
 ├── types/            # TypeScript型定義
 └── __tests__/        # テストファイル (ディレクトリ構造を反映)
 ```
@@ -101,7 +99,6 @@ const colors = {
 - **サーバー状態**: TanStack Query v5 のみ使用
 - **ローカル状態**: useState (一時的な状態のみ)
 - **グローバル状態**: Zustand または Context (最小限)
-- **API**: Orbal 自動生成 (`src/utils/lib/api`)
 
 ```typescript
 // 推奨パターン
@@ -119,6 +116,10 @@ const { data, isLoading, error } = useQuery({
 - **型安全性**: `any`型禁止、厳密な型定義
 - **メモ化**: `useMemo`/`useCallback`で不要な再レンダリング防止
 - **遅延読み込み**: `React.lazy`でコード分割
+- **RSC**: React Server Components を活用したデータフェッチ
+  - 画像アップロードなどの重い処理は RSC で実装し、クライアント負荷を軽減
+  - RSC と CSR の適切な役割分担を行い、パフォーマンス最適化を図る
+  - 画像アップロードなどの環境変数の管理に注意し、RSC でのみ必要な情報を適切に扱う
 
 ### モバイル最適化
 
