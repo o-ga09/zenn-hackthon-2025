@@ -10,9 +10,12 @@ applyTo: "**/*.tsx,**/*.ts,**/*.js,**/*.jsx"
 - **フレームワーク**: React 18 + TypeScript + Vite
 - **状態管理**: TanStack Query v5 (サーバー状態) + useState/useReducer (ローカル状態)
 - **スタイリング**: TailwindCSS v3 (モバイルファースト)
+- **ユーザー認証**: Firebase Auth
 - **API**: Orbal 自動生成クライアント (`src/utils/lib/api`)
 - **テスト**: Jest + React Testing Library
 - **計装**: OpenTelemetry
+- **AI 連携**: バックエンドの Firebase Genkit 経由で Vertex AI 利用
+- **ホスティング**: Google Cloud Run
 
 ## ディレクトリ構成
 

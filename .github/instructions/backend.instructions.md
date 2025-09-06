@@ -8,7 +8,13 @@ applyTo: "**/*.go,**/go.mod,**/go.sum"
 ## アプリケーション概要
 
 - Go 言語で実装される REST API サーバー
-- Google Cloud Run でのデプロイメントを前提とした設計
+- **Web フレームワーク**: Gin
+- **ORM**: Gorm
+- **データベース**: TiDB
+- **ユーザー認証**: Firebase Auth
+- **AI エージェント**: Firebase Genkit
+- **AI サービス**: Vertex AI (Gemma、Veo)
+- **ホスティング**: Google Cloud Run
 - マイクロサービスアーキテクチャを採用
 
 ## ディレクトリ構成
@@ -19,13 +25,50 @@ Go Standard Project Layout に厳密に従う：
 backend/
 ├── cmd/           # メインアプリケーション
 ├── internal/      # プライベートアプリケーションコード
-│   ├── handler/   # HTTPハンドラー
+│   ├── handler/   # HTTPハンドラー (Gin)
 │   ├── service/   # ビジネスロジック
-│   ├── repository/ # データアクセス層
-│   └── middleware/ # ミドルウェア
+│   ├── repository/ # データアクセス層 (Gorm)
+│   ├── middleware/ # ミドルウェア
+│   └── genkit/    # Firebase Genkit AIエージェント
 ├── pkg/           # 外部アプリケーションで使用可能なライブラリコード
 └── api/           # OpenAPI/Swagger仕様、JSONスキーマファイル
 ```
+
+## 技術スタック詳細
+
+### Gin Web フレームワーク
+
+- HTTP ルーティング
+- ミドルウェア処理
+- JSON バインディング・レスポンス
+- CORS 対応
+
+### Gorm ORM
+
+- TiDB データベース接続
+- モデル定義・マイグレーション
+- クエリビルダー
+- リレーション管理
+
+### Firebase Genkit
+
+- AI エージェント機能の実装
+- Vertex AI との連携
+- プロンプト管理
+- ツール・フロー定義
+
+### Firebase Auth
+
+- ユーザー認証・認可
+- JWT トークン検証
+- ソーシャルログイン対応
+- セッション管理
+
+### Vertex AI 連携
+
+- **Gemma**: テキスト生成・対話
+- **Veo**: 動画生成・処理
+- 旅行振り返りコンテンツの AI 生成
 
 ## テスト戦略
 
