@@ -2,67 +2,51 @@
 
 ## 概要
 
-旅行振り返り動画生成機能は、ユーザーがアップロードした旅行写真から AI が自動的に縦画面の動画やスライドショーを生成し、編集・共有できるシステムです。React フロントエンド、Golang バックエンド、Firebase Genkit を使用した AI エージェントで構成されます。
+旅行振り返り動画生成機能は、ユーザーがアップロードした旅行写真から AI が自動的に縦画面の動画やスライドショーを生成し、編集・共有できるシステムです。フロントエンドは React、AI エージェントには Firebase Genkit を利用し、ユーザー情報・旅行情報はバックエンド API を新規作成する代わりに Firebase Firestore で一元管理します。
 
 ## アーキテクチャ
 
-### システム全体構成
+### システム全体構成（Firestore 中心）
 
 ```mermaid
 graph TB
-    subgraph "フロントエンド (React)"
-        UI[ユーザーインターフェース]
-        Upload[画像アップロード]
-        Editor[動画エディター]
-        Preview[プレビュー]
-    end
+subgraph "フロントエンド (React)"
+  UI["ユーザーインターフェース"]
+  Upload["画像アップロード"]
+  Editor["動画エディター"]
+  Preview["プレビュー"]
+end
 
-    subgraph "バックエンド (Golang)"
-        API[REST API]
-        Auth[認証サービス]
-        FileService[ファイル管理サービス]
-        VideoService[動画処理サービス]
-    end
+subgraph "サーバレス / クラウドサービス"
+  FireAuth["Firebase Auth"]
+  Firestore["Firestore (ユーザー/旅行データ)"]
+  Storage["Cloud Storage / R2 (画像・動画保存)"]
+  Genkit["Firebase Genkit (AI エージェント)"]
+end
 
-    subgraph "AI エージェント (Firebase Genkit)"
-        ImageAnalysis[画像解析]
-        LocationDetection[場所特定]
-        VideoGeneration[動画生成]
-        ChatAgent[チャットエージェント]
-    end
+subgraph "外部 AI"
+  VertexAI["Vertex AI / 3rd party AI"]
+end
 
-    subgraph "外部サービス"
-        VertexAI[Vertex AI - Gemma/Veo]
-        CloudStorage[Cloudflare R2]
-        MySQL[(MySQL Database)]
-    end
-
-    UI --> API
-    Upload --> FileService
-    Editor --> VideoService
-    Preview --> VideoService
-
-    API --> Auth
-    API --> FileService
-    API --> VideoService
-
-    FileService --> CloudStorage
-    VideoService --> ImageAnalysis
-    ImageAnalysis --> VertexAI
-    LocationDetection --> VertexAI
-    VideoGeneration --> VertexAI
-
-    Auth --> MySQL
-    FileService --> MySQL
-    VideoService --> MySQL
+UI -->|認証/認可| FireAuth
+UI -->|読み書き| Firestore
+Upload --> Storage
+Editor --> Firestore
+Editor --> Genkit
+Genkit --> VertexAI
+Storage --> Genkit
+Firestore --> Genkit
 ```
 
-### レイヤー構成
+### レイヤー構成（変更点）
 
-1. **プレゼンテーション層**: React フロントエンド
-2. **アプリケーション層**: Golang REST API
-3. **ドメイン層**: ビジネスロジック
-4. **インフラストラクチャ層**: データベース、ストレージ、AI サービス
+1. **プレゼンテーション層**: React フロントエンド（クライアントから直接 Firestore / Storage / Genkit を利用する想定）
+2. **認証層**: Firebase Auth（トークンを用いたアクセス制御）
+3. **データ層**: Firestore（ユーザー・旅行・画像・動画メタデータをドキュメントで管理）
+4. **AI/処理層**: Firebase Genkit と外部 AI（動画生成や画像解析の実行）
+5. **ストレージ層**: Cloud Storage または Cloudflare R2（大容量バイナリ保存）
+
+注: 軽微なサーバサイド処理（Webhook/Cloud Functions）が必要なケースは Cloud Functions で実装し、Firestore を真のソースオブトゥルースとして扱います。
 
 ## コンポーネントとインターフェース
 
@@ -135,82 +119,43 @@ interface ChatMessage {
 }
 ```
 
-### バックエンド API エンドポイント
+### Firestore を使ったデータアクセス設計（API の代替）
 
-#### 1. 画像管理 API
+本設計では、ユーザー管理・旅行情報管理・メタデータ保存は直接 Firestore を使って行い、REST API サーバの新規作成は最小化します。以下は Firestore ドキュメント構造の例です。
 
-```go
-// POST /api/v1/images/upload
-type UploadImageRequest struct {
-    Images []multipart.FileHeader `form:"images"`
-    TravelID string `form:"travel_id"`
-}
+- users/{userId}
+  - email: string
+  - name: string
+  - createdAt: timestamp
+  - profile: {...}
 
-type UploadImageResponse struct {
-    Images []ImageInfo `json:"images"`
-}
+- travels/{travelId}
+  - userId: string
+  - title: string
+  - description: string
+  - startDate: timestamp
+  - endDate: timestamp
+  - status: string
+  - createdAt: timestamp
 
-// GET /api/v1/images/{travel_id}
-type GetImagesResponse struct {
-    Images []ImageInfo `json:"images"`
-}
-```
+- travels/{travelId}/images/{imageId}
+  - originalName: string
+  - storagePath: string
+  - url: string
+  - size: number
+  - mimeType: string
+  - width: number
+  - height: number
+  - metadata: map
+  - analysisData: map
+  - createdAt: timestamp
 
-#### 2. 動画生成 API
+- travels/{travelId}/videos/{videoId}
+  - title, storagePath, url, thumbnailUrl, duration, width, height, size, status, style, scenes, music, effects, isPublic, createdAt, updatedAt
 
-```go
-// POST /api/v1/videos/generate
-type GenerateVideoRequest struct {
-    TravelID string `json:"travel_id"`
-    TravelInfo TravelInfo `json:"travel_info"`
-    ImageIDs []string `json:"image_ids"`
-    Style VideoStyle `json:"style"`
-}
+フロントエンドは Firebase SDK（Firestore/Storage/Auth）を直接利用して上記ドキュメントを読み書きします。生成処理の開始や完了通知、長時間処理の管理は Cloud Functions と Firestore トリガーで実装します（例: videos ドキュメントの status を更新するワークフロー）。
 
-type GenerateVideoResponse struct {
-    VideoID string `json:"video_id"`
-    Status string `json:"status"`
-    EstimatedTime int `json:"estimated_time_seconds"`
-}
-
-// GET /api/v1/videos/{video_id}/status
-type VideoStatusResponse struct {
-    Status string `json:"status"`
-    Progress int `json:"progress"`
-    VideoURL string `json:"video_url,omitempty"`
-}
-```
-
-#### 3. 動画編集 API
-
-```go
-// PUT /api/v1/videos/{video_id}/edit
-type EditVideoRequest struct {
-    Updates []VideoUpdate `json:"updates"`
-}
-
-type VideoUpdate struct {
-    Type string `json:"type"` // "text", "music", "order", "effect"
-    Target string `json:"target"`
-    Value interface{} `json:"value"`
-}
-```
-
-#### 4. AI チャット API
-
-```go
-// POST /api/v1/chat/{video_id}
-type ChatRequest struct {
-    Message string `json:"message"`
-    Context ChatContext `json:"context"`
-}
-
-type ChatResponse struct {
-    Response string `json:"response"`
-    Suggestions []VideoUpdate `json:"suggestions"`
-    RequiresConfirmation bool `json:"requires_confirmation"`
-}
-```
+必要に応じて軽量な REST エンドポイント（例：外部サービス向けの webhook ハンドラや非公開管理用 API）は Cloud Functions（HTTP）で実装しますが、通常の CRUD は Firestore で完結します。
 
 ### AI エージェントインターフェース
 
@@ -266,221 +211,107 @@ interface ActionIntent {
 }
 ```
 
-## データモデル
+## データモデル（Firestore ドキュメント例）
 
-### 1. ユーザーモデル
+この設計では Firestore を一次データストアとして使うため、Go の構造体ではなくドキュメントスキーマ例を記述します。
 
-```go
-type User struct {
-    ID        string    `json:"id" gorm:"primaryKey"`
-    Email     string    `json:"email" gorm:"unique;not null"`
-    Name      string    `json:"name"`
-    CreatedAt time.Time `json:"created_at"`
-    UpdatedAt time.Time `json:"updated_at"`
-}
-```
+- users/{userId}
+  - email: string
+  - name: string
+  - createdAt: timestamp
+  - updatedAt: timestamp
 
-### 2. 旅行モデル
+- travels/{travelId}
+  - userId: string
+  - title: string
+  - description: string
+  - startDate: timestamp
+  - endDate: timestamp
+  - status: string // "draft" | "processing" | "completed"
+  - createdAt: timestamp
+  - updatedAt: timestamp
 
-```go
-type Travel struct {
-    ID          string    `json:"id" gorm:"primaryKey"`
-    UserID      string    `json:"user_id" gorm:"not null"`
-    Title       string    `json:"title" gorm:"not null"`
-    Description string    `json:"description"`
-    StartDate   time.Time `json:"start_date"`
-    EndDate     time.Time `json:"end_date"`
-    Status      string    `json:"status"` // "draft", "processing", "completed"
-    CreatedAt   time.Time `json:"created_at"`
-    UpdatedAt   time.Time `json:"updated_at"`
+- travels/{travelId}/images/{imageId}
+  - originalName: string
+  - storagePath: string
+  - url: string
+  - size: number
+  - mimeType: string
+  - width: number
+  - height: number
+  - metadata: map
+  - analysisData: map
+  - createdAt: timestamp
 
-    User   User    `json:"user" gorm:"foreignKey:UserID"`
-    Images []Image `json:"images" gorm:"foreignKey:TravelID"`
-    Videos []Video `json:"videos" gorm:"foreignKey:TravelID"`
-}
-```
+- travels/{travelId}/videos/{videoId}
+  - title: string
+  - storagePath: string
+  - url: string
+  - thumbnailUrl: string
+  - duration: number
+  - width: number
+  - height: number
+  - size: number
+  - status: string // "generating" | "completed" | "error"
+  - style: map
+  - scenes: array
+  - music: map
+  - effects: map
+  - shareUrl: string
+  - isPublic: boolean
+  - createdAt: timestamp
+  - updatedAt: timestamp
 
-### 3. 画像モデル
+チャットの履歴は travels/{travelId}/videos/{videoId}/chatHistory/{chatId} などのサブコレクションで管理します。Firestore のセキュリティルールを用いてユーザー毎のアクセス制御を厳格に設定してください。
 
-```go
-type Image struct {
-    ID           string    `json:"id" gorm:"primaryKey"`
-    TravelID     string    `json:"travel_id" gorm:"not null"`
-    OriginalName string    `json:"original_name"`
-    StoragePath  string    `json:"storage_path"`
-    URL          string    `json:"url"`
-    Size         int64     `json:"size"`
-    MimeType     string    `json:"mime_type"`
-    Width        int       `json:"width"`
-    Height       int       `json:"height"`
-    Metadata     JSON      `json:"metadata"` // EXIF, location, etc.
-    AnalysisData JSON      `json:"analysis_data"` // AI analysis results
-    CreatedAt    time.Time `json:"created_at"`
+## エラーハンドリング（Firestore / Genkit 前提）
 
-    Travel Travel `json:"travel" gorm:"foreignKey:TravelID"`
-}
-```
+- フロントエンドは Firestore SDK のエラーコード（permission-denied, not-found, unavailable など）をハンドリングします。クライアント側で retryable 判定を行い、ユーザーに明確なメッセージを返します。
+- 長時間処理（動画生成等）は videos ドキュメントの status と progress を使って進捗管理。Cloud Functions のリトライロジックや Genkit のエラーを捕捉して videos ドキュメントにエラー情報を保存します。
+- AI サービス呼び出しの失敗時は、Genkit / VertexAI のエラーを Cloud Functions 内でハンドリングし、必要に応じてフォールバック（軽量なスライドショー生成など）を提供します。
 
-### 4. 動画モデル
+エラー種別例:
+- validation / client-side (ファイルサイズ超過, 形式エラー)
+- auth / permission (Firebase Auth / Firestore ルール違反)
+- transient (ネットワーク, VertexAI の一時障害)
+- processing (動画生成の内部失敗)
 
-```go
-type Video struct {
-    ID           string    `json:"id" gorm:"primaryKey"`
-    TravelID     string    `json:"travel_id" gorm:"not null"`
-    Title        string    `json:"title"`
-    StoragePath  string    `json:"storage_path"`
-    URL          string    `json:"url"`
-    ThumbnailURL string    `json:"thumbnail_url"`
-    Duration     int       `json:"duration"` // seconds
-    Width        int       `json:"width"`
-    Height       int       `json:"height"`
-    Size         int64     `json:"size"`
-    Status       string    `json:"status"` // "generating", "completed", "error"
-    Style        JSON      `json:"style"`
-    Scenes       JSON      `json:"scenes"`
-    Music        JSON      `json:"music"`
-    Effects      JSON      `json:"effects"`
-    ShareURL     string    `json:"share_url"`
-    IsPublic     bool      `json:"is_public"`
-    CreatedAt    time.Time `json:"created_at"`
-    UpdatedAt    time.Time `json:"updated_at"`
+各エラーは Firestore のログコレクションに記録し、運用時は Cloud Monitoring / Error Reporting と連携してください。
 
-    Travel Travel `json:"travel" gorm:"foreignKey:TravelID"`
-}
-```
+## テスト戦略（Firestore / Cloud Functions 前提）
 
-### 5. チャット履歴モデル
+### フロントエンド
+- 単体テスト: React コンポーネント（vitest）
+- Firestore の読み書きは Firebase のエミュレータを使ったインテグレーションテストを推奨
 
-```go
-type ChatHistory struct {
-    ID        string    `json:"id" gorm:"primaryKey"`
-    VideoID   string    `json:"video_id" gorm:"not null"`
-    UserID    string    `json:"user_id" gorm:"not null"`
-    Message   string    `json:"message"`
-    Response  string    `json:"response"`
-    Intent    JSON      `json:"intent"`
-    Actions   JSON      `json:"actions"`
-    CreatedAt time.Time `json:"created_at"`
+### サーバレス（Cloud Functions / Genkit）
+- 単体テスト: 小さな関数ごとにユニットテスト
+- エンドツーエンド: Genkit 呼び出しと Storage/Firestore のやり取りはモック化・エミュレータで確認
 
-    Video Video `json:"video" gorm:"foreignKey:VideoID"`
-    User  User  `json:"user" gorm:"foreignKey:UserID"`
-}
-```
+### AI サービス
+- モックテスト: Genkit / VertexAI のモックレスポンスを用意
+- 品質テスト: 生成動画のサンプル評価を自動化（簡易メトリクス: 解像度, 期間, シーン数）
 
-## エラーハンドリング
+### テストデータ管理
+- Firebase emulator の seed スクリプトを用意し、CI で reproducible な環境を準備します。
 
-### 1. フロントエンドエラーハンドリング
+## セキュリティ考慮事項（Firestore/Firestore Rules 前提）
 
-```typescript
-interface ErrorState {
-  type: "upload" | "generation" | "editing" | "network";
-  message: string;
-  code?: string;
-  retryable: boolean;
-}
+### 認証・認可
+- Firebase Auth を認証基盤として利用。Firestore セキュリティルールでユーザー単位のアクセス制御を明確に定義します（例: travels ドキュメントは owner のみ書込可）。
 
-class ErrorHandler {
-  static handleUploadError(error: UploadError): ErrorState;
-  static handleGenerationError(error: GenerationError): ErrorState;
-  static handleNetworkError(error: NetworkError): ErrorState;
-}
-```
+### ファイルセキュリティ
+- Storage のアップロードルールとクライアント側検証を組合わせる。必要なら Cloud Functions でウイルススキャンやコンテンツ検査を実行します。
 
-### 2. バックエンドエラーハンドリング
+### データ保護
+- Firestore は暗号化済み。個人情報の削除はドキュメント削除 + Storage のオブジェクト削除をトランザクション化して確実に行うワークフローを用意します。
 
-```go
-type APIError struct {
-    Code    string `json:"code"`
-    Message string `json:"message"`
-    Details string `json:"details,omitempty"`
-}
+### AI セキュリティ
+- Genkit / VertexAI へ送る入力はサニタイズし、誤用を防ぐために利用制限を設けます。API キーは Secret Manager か環境変数で管理し、クライアント側に直接公開しないでください。
 
-type ErrorCode string
+---
 
-const (
-    ErrInvalidInput     ErrorCode = "INVALID_INPUT"
-    ErrFileTooBig      ErrorCode = "FILE_TOO_BIG"
-    ErrUnsupportedType ErrorCode = "UNSUPPORTED_TYPE"
-    ErrGenerationFailed ErrorCode = "GENERATION_FAILED"
-    ErrNotFound        ErrorCode = "NOT_FOUND"
-    ErrUnauthorized    ErrorCode = "UNAUTHORIZED"
-    ErrInternalError   ErrorCode = "INTERNAL_ERROR"
-)
-```
-
-### 3. AI サービスエラーハンドリング
-
-```typescript
-interface AIServiceError {
-  service: "image_analysis" | "video_generation" | "chat_agent";
-  error: string;
-  retryable: boolean;
-  fallbackAvailable: boolean;
-}
-
-class AIErrorHandler {
-  static handleVertexAIError(error: VertexAIError): AIServiceError;
-  static handleGenkitError(error: GenkitError): AIServiceError;
-}
-```
-
-## テスト戦略
-
-### 1. フロントエンドテスト
-
-- **単体テスト**: React コンポーネントのテスト（vitest）
-
-### 2. バックエンドテスト
-
-- **単体テスト**: 各サービス・ハンドラーのテスト
-
-### 3. AI サービステスト
-
-- **モックテスト**: AI サービスのモック化テスト
-- **品質テスト**: 生成される動画の品質評価
-- **レスポンス時間テスト**: AI 処理時間の測定
-
-### 4. テストデータ管理
-
-```go
-type TestDataManager struct {
-    SampleImages []TestImage
-    SampleTravels []TestTravel
-    MockAIResponses map[string]interface{}
-}
-
-func (t *TestDataManager) SetupTestData() error
-func (t *TestDataManager) CleanupTestData() error
-```
-
-### 5. テスト環境
-
-- **開発環境**: ローカル開発用（Docker Compose）
-- **ステージング環境**: 本番環境と同等の構成
-- **CI/CD パイプライン**: 自動テスト実行
-
-## セキュリティ考慮事項
-
-### 1. 認証・認可
-
-- JWT トークンベースの認証
-- ユーザーごとのリソースアクセス制御
-- API レート制限
-
-### 2. ファイルセキュリティ
-
-- アップロードファイルの検証（ファイル形式、サイズ、内容）
-- ウイルススキャン
-- 安全なファイル名生成
-
-### 3. データ保護
-
-- 個人情報の暗号化
-- GDPR 準拠のデータ削除機能
-- アクセスログの記録
-
-### 4. AI セキュリティ
-
-- 入力データの検証
-- 生成コンテンツの適切性チェック
-- AI サービスの API キー管理
+変更点まとめ:
+- ユーザー/旅行情報は Firestore で一元管理。
+- CRUD は原則 Firestore SDK でクライアントが直接実行。
+- 長時間処理や外部連携は Cloud Functions が仲介し、Firestore を真のソースオブトゥルースとする。
