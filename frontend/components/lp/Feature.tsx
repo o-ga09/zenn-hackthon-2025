@@ -1,0 +1,60 @@
+import { Upload, Edit, Sparkles } from 'lucide-react'
+import React from 'react'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card'
+
+export default function Feature() {
+  return (
+    <section className="container mx-auto px-4 py-20">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl font-bold text-foreground mb-4">3つのステップで完成</h2>
+        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          複雑な編集作業は不要。シンプルな操作で、プロ品質の動画が完成します。
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Upload className="w-8 h-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">写真をアップロード</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="text-base">
+              旅行の思い出の写真を選んでアップロード。複数枚でも一度に処理できます。
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Edit className="w-8 h-8 text-secondary" />
+            </div>
+            <CardTitle className="text-2xl">旅行情報を入力</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="text-base">
+              旅行のタイトルと日付を入力。AIがこの情報を使って動画をパーソナライズします。
+            </CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-8 h-8 text-accent" />
+            </div>
+            <CardTitle className="text-2xl">AI動画生成</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="text-base">
+              AIが自動的にエモーショナルな動画を生成。音楽やエフェクトも自動で追加されます。
+            </CardDescription>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  )
+}
