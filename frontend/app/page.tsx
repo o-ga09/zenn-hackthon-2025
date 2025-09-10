@@ -1,102 +1,258 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Camera,
+  Video,
+  Sparkles,
+  Upload,
+  Edit,
+  Share2,
+  Play,
+  Heart,
+  Star,
+} from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100">
+      {/* Header */}
+      <header className="container mx-auto px-4 py-6">
+        <nav className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Video className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground">
+              TravelMoments
+            </span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" className="text-foreground">
+              ログイン
+            </Button>
+            <Button className="bg-primary hover:bg-primary/90">
+              無料で始める
+            </Button>
+          </div>
+        </nav>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <div className="max-w-4xl mx-auto">
+          <Badge className="mb-6 bg-secondary/20 text-secondary-foreground border-secondary/30">
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI搭載の新しい旅行体験
+          </Badge>
+
+          <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 text-balance">
+            旅の記録を、
+            <br />
+            <span className="text-primary">もっと簡単に</span>
+          </h1>
+
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
+            旅行の写真をアップロードするだけで、AIが自動的にエモーショナルな縦画面動画を生成。
+            YouTube ShortsやInstagramストーリーズで簡単にシェアできます。
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button
+              size="lg"
+              className="bg-primary hover:bg-primary/90 text-lg px-8 py-6"
+            >
+              <Play className="w-5 h-5 mr-2" />
+              無料で動画を作成
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-lg px-8 py-6 bg-transparent"
+            >
+              <Video className="w-5 h-5 mr-2" />
+              デモを見る
+            </Button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-foreground mb-4">
+            3つのステップで完成
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            複雑な編集作業は不要。シンプルな操作で、プロ品質の動画が完成します。
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Upload className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">写真をアップロード</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                旅行の思い出の写真を選んでアップロード。複数枚でも一度に処理できます。
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Edit className="w-8 h-8 text-secondary" />
+              </div>
+              <CardTitle className="text-2xl">旅行情報を入力</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                旅行のタイトルと日付を入力。AIがこの情報を使って動画をパーソナライズします。
+              </CardDescription>
+            </CardContent>
+          </Card>
+
+          <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
+            <CardHeader>
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-accent" />
+              </div>
+              <CardTitle className="text-2xl">AI動画生成</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-base">
+                AIが自動的にエモーショナルな動画を生成。音楽やエフェクトも自動で追加されます。
+              </CardDescription>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+          <div>
+            <h3 className="text-3xl font-bold text-foreground mb-6">
+              なぜTravelMomentsを選ぶのか？
+            </h3>
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Heart className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">
+                    エモーショナルな体験
+                  </h4>
+                  <p className="text-muted-foreground">
+                    AIが写真から感情を読み取り、その瞬間にぴったりの音楽とエフェクトを選択します。
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Share2 className="w-4 h-4 text-secondary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">
+                    簡単シェア
+                  </h4>
+                  <p className="text-muted-foreground">
+                    YouTube
+                    ShortsやInstagramストーリーズに最適化された縦画面動画を生成します。
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start space-x-4">
+                <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                  <Star className="w-4 h-4 text-accent" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-2">
+                    プロ品質
+                  </h4>
+                  <p className="text-muted-foreground">
+                    高度なAI技術により、プロが作ったような高品質な動画を自動生成します。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center">
+              <div className="text-center">
+                <Camera className="w-16 h-16 text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">動画プレビュー</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="bg-gradient-to-r from-primary to-secondary rounded-3xl p-12 text-center text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-black/20 rounded-3xl"></div>
+          <div className="relative z-10">
+            <h3 className="text-4xl font-bold mb-4 text-white drop-shadow-lg">
+              今すぐ始めよう
+            </h3>
+            <p className="text-xl mb-8 text-white/95 max-w-2xl mx-auto drop-shadow-md">
+              あなたの旅行の思い出を、AIの力で特別な動画に変えませんか？
+              無料で始められます。
+            </p>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 shadow-lg"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              無料で動画を作成する
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-4 py-12 border-t border-border">
+        <div className="text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-6 h-6 bg-primary rounded-lg flex items-center justify-center">
+              <Video className="w-4 h-4 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-bold text-foreground">
+              TravelMoments
+            </span>
+          </div>
+          <p className="text-muted-foreground mb-4">
+            旅の記録を、AIでもっと簡単に、もっとエモく。
+          </p>
+          <div className="flex justify-center space-x-6 text-sm text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">
+              プライバシーポリシー
+            </a>
+            <a href="#" className="hover:text-foreground transition-colors">
+              利用規約
+            </a>
+            <a href="#" className="hover:text-foreground transition-colors">
+              お問い合わせ
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );
