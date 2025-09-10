@@ -1,4 +1,4 @@
-import { Video } from 'lucide-react'
+import { Video, Users } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/button'
 import Link from 'next/link'
@@ -12,6 +12,26 @@ export default function CommonHeader() {
           <Link href="/dashboard" className="text-xl font-bold text-primary">
             Tavinikkiy
           </Link>
+
+          {/* ナビゲーションリンク */}
+          <nav className="hidden md:flex items-center space-x-4 ml-6">
+            <Link
+              href="/dashboard"
+              className="text-sm font-medium text-gray-700 hover:text-primary"
+            >
+              ダッシュボード
+            </Link>
+            <Link href="/videos" className="text-sm font-medium text-gray-700 hover:text-primary">
+              マイ動画
+            </Link>
+            <Link
+              href="/any-one"
+              className="text-sm font-medium text-gray-700 hover:text-primary flex items-center"
+            >
+              <Users className="h-4 w-4 mr-1" />
+              みんなの動画
+            </Link>
+          </nav>
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon">

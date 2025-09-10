@@ -87,3 +87,76 @@ export const videos = [
     likes: 67,
   },
 ]
+
+export const anyOneVideos = [
+  {
+    id: 101,
+    title: '京都の桜 2024',
+    description:
+      '京都で撮影した美しい桜のシーンをまとめた旅行動画です。春の訪れを感じる素敵な景色をお楽しみください。',
+    date: '2024年4月5日',
+    duration: '0:45',
+    videoUrl: 'https://example.com/videos/kyoto-sakura.mp4',
+    thumbnail: '/kyoto-travel-video-thumbnail.jpg',
+    userName: '旅人太郎',
+    userAvatar: '/placeholder.webp',
+    likes: 345,
+    comments: 28,
+  },
+  {
+    id: 102,
+    title: '沖縄の海を満喫',
+    description:
+      '沖縄の美しい海でのシュノーケリングや海水浴の思い出です。エメラルドグリーンの海と白い砂浜が最高でした！',
+    date: '2024年5月20日',
+    duration: '0:58',
+    videoUrl: 'https://example.com/videos/okinawa-beach.mp4',
+    thumbnail: '/okinawa-beach-video-thumbnail.jpg',
+    userName: 'ビーチラバー',
+    userAvatar: '/placeholder.webp',
+    likes: 562,
+    comments: 43,
+  },
+  {
+    id: 103,
+    title: '北海道の大自然',
+    description:
+      '北海道の大自然を満喫した旅行記録です。広大な景色と野生動物との出会いが素晴らしかったです。',
+    date: '2024年7月15日',
+    duration: '1:12',
+    videoUrl: 'https://example.com/videos/hokkaido-nature.mp4',
+    thumbnail: '/hokkaido-ski-video-thumbnail.jpg',
+    userName: '山岳写真家',
+    userAvatar: '/placeholder.webp',
+    likes: 421,
+    comments: 35,
+  },
+  {
+    id: 104,
+    title: '東京夜景ツアー',
+    description:
+      '東京の美しい夜景スポットを巡る旅。スカイツリーや東京タワーからの夜景は息をのむ美しさでした。',
+    date: '2024年6月8日',
+    duration: '0:52',
+    videoUrl: 'https://example.com/videos/tokyo-night.mp4',
+    thumbnail: '/tokyo-food-tour-video-thumbnail.jpg',
+    userName: 'ナイトフォトグラファー',
+    userAvatar: '/placeholder.webp',
+    likes: 289,
+    comments: 19,
+  },
+  {
+    id: 105,
+    title: '奈良公園の鹿と遊ぶ',
+    description:
+      '奈良公園で鹿と触れ合った楽しい一日。歴史的建造物と自然が調和した景色も素晴らしかったです。',
+    date: '2024年5月30日',
+    duration: '1:05',
+    videoUrl: 'https://example.com/videos/nara-park.mp4',
+    thumbnail: '/osaka-castle-cherry-blossoms-video-thumbnail.jpg',
+    userName: '動物好き旅人',
+    userAvatar: '/placeholder.webp',
+    likes: 378,
+    comments: 32,
+  },
+]
