@@ -11,10 +11,12 @@ interface UploadFormContextProps {
   setStep: (step: UploadStep) => void
   nextStep: () => void
   prevStep: () => void
-  handleGenerateVideo: () => void
+  handleGenerateVideo: () => Promise<void>
   addFiles: (files: File[]) => void
   removeFile: (index: number) => void
   uploadedFiles: File[]
+  isGenerating: boolean
+  generationError: string | null
 }
 
 const UploadFormContext = createContext<UploadFormContextProps | undefined>(undefined)
@@ -36,6 +38,9 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
   const [step, setStep] = useState<UploadStep>('upload')
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generationError, setGenerationError] = useState<string | null>(null)
+
   const methods = useForm<TravelFormValues>({
     resolver: zodResolver(travelFormSchema),
     defaultValues: {
@@ -49,8 +54,22 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
   })
 
   const nextStep = () => {
-    if (step === 'upload') setStep('info')
-    else if (step === 'info') setStep('confirm')
+    if (step === 'upload') {
+      if (uploadedFiles.length > 0) {
+        setStep('info')
+      }
+    } else if (step === 'info') {
+      if (
+        methods.formState.isValid &&
+        !methods.formState.errors.travelTitle &&
+        !methods.formState.errors.travelDate
+      ) {
+        setStep('confirm')
+      } else {
+        // フォームのバリデーションを強制的に実行
+        methods.trigger(['travelTitle', 'travelDate'])
+      }
+    }
   }
 
   const prevStep = () => {
@@ -58,10 +77,36 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
     else if (step === 'info') setStep('upload')
   }
 
-  const handleGenerateVideo = () => {
-    // ここで動画生成処理を開始
-    // 成功したら動画ページへリダイレクト
-    router.push('/videos')
+  const handleGenerateVideo = async () => {
+    try {
+      // 生成中の状態を設定
+      setIsGenerating(true)
+      setGenerationError(null)
+
+      // フォームデータの取得
+      const formData = methods.getValues()
+
+      console.log('動画生成処理を開始', {
+        travelTitle: formData.travelTitle,
+        travelDate: formData.travelDate,
+        travelLocation: formData.travelLocation,
+        travelDescription: formData.travelDescription,
+        photosCount: uploadedFiles.length,
+      })
+
+      // モックAPI呼び出し - 実際のAPIが実装されたらここを置き換える
+      // 実際の実装では、写真ファイルをアップロードし、処理をリクエストするコードが入ります
+      await new Promise(resolve => setTimeout(resolve, 2000)) // 2秒待機してAPIリクエストをシミュレート
+
+      // 成功した場合、動画ページへリダイレクト
+      router.push('/videos')
+    } catch (error) {
+      // エラーハンドリング
+      console.error('動画生成中にエラーが発生しました', error)
+      setGenerationError('動画生成中にエラーが発生しました。もう一度お試しください。')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const addFiles = (files: File[]) => {
@@ -90,6 +135,8 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
     addFiles,
     removeFile,
     uploadedFiles,
+    isGenerating,
+    generationError,
   }
 
   return (

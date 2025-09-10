@@ -3,18 +3,57 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@radix-ui/react-label'
 import { Camera, Upload } from 'lucide-react'
-import React from 'react'
+import React, { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { useUploadForm } from './UploadFormContext'
 
 export default function PhotoUpload() {
   const { uploadedFiles, addFiles, removeFile } = useUploadForm()
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
-    addFiles(files)
+    if (files.length > 0) {
+      addFiles(files)
+    }
+  }
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      const imageFiles = files.filter(file => file.type.startsWith('image/'))
+      if (imageFiles.length > 0) {
+        addFiles(imageFiles)
+      }
+    }
+  }
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click()
   }
 
   return (
@@ -29,12 +68,26 @@ export default function PhotoUpload() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-              <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+              }`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={handleButtonClick}
+            >
+              <Upload
+                className={`w-12 h-12 mx-auto mb-4 ${
+                  isDragging ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              />
               <p className="text-muted-foreground mb-4">
                 ここに写真をドラッグ&ドロップするか、クリックして選択
               </p>
               <Input
+                ref={fileInputRef}
                 type="file"
                 multiple
                 accept="image/*"
@@ -42,11 +95,9 @@ export default function PhotoUpload() {
                 className="hidden"
                 id="file-upload"
               />
-              <Label htmlFor="file-upload">
-                <Button variant="outline" className="cursor-pointer bg-transparent">
-                  写真を選択
-                </Button>
-              </Label>
+              <Button variant="outline" className="cursor-pointer bg-transparent">
+                写真を選択
+              </Button>
             </div>
           </div>
         </CardContent>

@@ -3,17 +3,31 @@
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Sparkles, ArrowRight } from 'lucide-react'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useFormContext } from 'react-hook-form'
 import { TravelFormValues } from './form-schema'
 import { useUploadForm } from './UploadFormContext'
 
 export default function VideoGenerationConfirm() {
-  const { watch } = useFormContext<TravelFormValues>()
-  const { handleGenerateVideo, uploadedFiles } = useUploadForm()
+  const { getValues } = useFormContext<TravelFormValues>()
+  const { handleGenerateVideo, uploadedFiles, isGenerating, generationError } = useUploadForm()
+  const [formValues, setFormValues] = useState({
+    travelTitle: '',
+    travelDate: '',
+    travelLocation: '指定なし',
+    travelDescription: '指定なし',
+  })
 
-  const travelTitle = watch('travelTitle')
-  const travelDate = watch('travelDate')
+  // コンポーネントがマウントされた時と再レンダリング時に最新のフォーム値を取得
+  useEffect(() => {
+    const values = getValues()
+    setFormValues({
+      travelTitle: values.travelTitle || '',
+      travelDate: values.travelDate || '',
+      travelLocation: values.travelLocation || '指定なし',
+      travelDescription: values.travelDescription || '指定なし',
+    })
+  }, [getValues, uploadedFiles]) // uploadedFilesが変更された時も再取得
 
   return (
     <div className="space-y-6">
@@ -21,10 +35,21 @@ export default function VideoGenerationConfirm() {
         <h3 className="font-semibold mb-2">確認事項</h3>
         <ul className="list-disc list-inside space-y-2 text-sm">
           <li>アップロードした写真: {uploadedFiles.length}枚</li>
-          <li>旅行タイトル: {travelTitle}</li>
-          <li>旅行日: {travelDate}</li>
+          <li>旅行タイトル: {formValues.travelTitle}</li>
+          <li>旅行日: {formValues.travelDate}</li>
+          <li>場所: {formValues.travelLocation}</li>
+          <li>
+            説明: {formValues.travelDescription.substring(0, 50)}
+            {formValues.travelDescription.length > 50 ? '...' : ''}
+          </li>
         </ul>
       </div>
+
+      {generationError && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+          <p>{generationError}</p>
+        </div>
+      )}
 
       <Card className="border-0 shadow-lg bg-gradient-to-r from-primary to-secondary p-6 text-white">
         <div className="mb-4">
@@ -36,11 +61,44 @@ export default function VideoGenerationConfirm() {
           variant="secondary"
           className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 w-full"
           onClick={handleGenerateVideo}
-          disabled={uploadedFiles.length === 0 || !travelTitle || !travelDate}
+          disabled={
+            uploadedFiles.length === 0 ||
+            !formValues.travelTitle ||
+            !formValues.travelDate ||
+            isGenerating
+          }
         >
-          <Sparkles className="w-5 h-5 mr-2" />
-          AI動画生成を開始
-          <ArrowRight className="w-5 h-5 ml-2" />
+          {isGenerating ? (
+            <>
+              <svg
+                className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              動画生成中...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-5 h-5 mr-2" />
+              AI動画生成を開始
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </>
+          )}
         </Button>
       </Card>
     </div>

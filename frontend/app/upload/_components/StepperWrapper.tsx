@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { useFormContext } from 'react-hook-form'
 import StepperLayout from '@/components/layout/StepperLayout'
 import PhotoUpload from './PhotoUpload'
 import TravelInfo from './TravelInfo'
@@ -9,6 +10,7 @@ import { UploadFormProvider, useUploadForm } from './UploadFormContext'
 
 function UploadStepper() {
   const { step, nextStep, prevStep, uploadedFiles } = useUploadForm()
+  const { formState } = useFormContext()
 
   const steps = [
     {
@@ -21,7 +23,10 @@ function UploadStepper() {
       title: '旅行情報の入力',
       description: '動画に含める旅行の詳細',
       content: <TravelInfo />,
-      isNextDisabled: false, // フォームのバリデーションはReact Hook Formが処理
+      isNextDisabled:
+        !formState.isValid ||
+        Boolean(formState.errors.travelTitle) ||
+        Boolean(formState.errors.travelDate),
     },
     {
       title: '動画生成',
