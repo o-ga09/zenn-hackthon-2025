@@ -3,7 +3,6 @@
 import MainLayout from '@/components/layout/MainLayout'
 import InputTravelInformation from './_components/InputTravelInformation'
 import UploadedVideos from './_components/UploadedVideos'
-import GenerateVideo from './_components/GenerateVideo'
 
 export default function UploadPage() {
   return (
