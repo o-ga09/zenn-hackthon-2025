@@ -85,6 +85,7 @@ const config: Config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'pulse-light': 'pulse-light 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         'accordion-down': {
@@ -94,6 +95,18 @@ const config: Config = {
         'accordion-up': {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
+        },
+        'pulse-light': {
+          '0%, 100%': {
+            opacity: '1',
+            transform: 'scale(1)',
+            boxShadow: '0 0 0 0 rgba(147, 51, 234, 0.5)',
+          },
+          '50%': {
+            opacity: '0.9',
+            transform: 'scale(1.05)',
+            boxShadow: '0 0 0 6px rgba(147, 51, 234, 0)',
+          },
         },
       },
     },

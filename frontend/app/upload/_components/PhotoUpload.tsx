@@ -60,16 +60,18 @@ export default function PhotoUpload() {
     <div className="space-y-6">
       <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Camera className="w-5 h-5" />
+          <CardTitle className="flex items-center space-x-2 text-base md:text-lg lg:text-xl">
+            <Camera className="w-4 h-4 md:w-5 md:h-5" />
             <span>写真をアップロード</span>
           </CardTitle>
-          <CardDescription>旅行の思い出の写真を選択してください（複数選択可能）</CardDescription>
+          <CardDescription className="text-xs md:text-sm">
+            旅行の思い出の写真を選択してください（複数選択可能）
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div
-              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              className={`border-2 border-dashed rounded-lg p-4 md:p-8 text-center transition-colors ${
                 isDragging ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
               }`}
               onDragEnter={handleDragEnter}
@@ -79,11 +81,11 @@ export default function PhotoUpload() {
               onClick={handleButtonClick}
             >
               <Upload
-                className={`w-12 h-12 mx-auto mb-4 ${
+                className={`w-10 h-10 md:w-12 md:h-12 mx-auto mb-3 md:mb-4 ${
                   isDragging ? 'text-primary' : 'text-muted-foreground'
                 }`}
               />
-              <p className="text-muted-foreground mb-4">
+              <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
                 ここに写真をドラッグ&ドロップするか、クリックして選択
               </p>
               <Input
@@ -95,7 +97,10 @@ export default function PhotoUpload() {
                 className="hidden"
                 id="file-upload"
               />
-              <Button variant="outline" className="cursor-pointer bg-transparent">
+              <Button
+                variant="outline"
+                className="cursor-pointer bg-transparent text-sm md:text-base"
+              >
                 写真を選択
               </Button>
             </div>
@@ -105,23 +110,25 @@ export default function PhotoUpload() {
 
       {/* Uploaded Files Preview */}
       {uploadedFiles.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="font-semibold">アップロード済み写真 ({uploadedFiles.length}枚)</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg">
+        <div className="space-y-1 md:space-y-2">
+          <h4 className="font-semibold text-sm md:text-base">
+            アップロード済み写真 ({uploadedFiles.length}枚)
+          </h4>
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-1 md:gap-2 max-h-36 md:max-h-48 overflow-y-auto p-1 md:p-2 border rounded-lg">
             {uploadedFiles.map((file, index) => (
               <div key={index} className="relative group">
                 <img
                   src={URL.createObjectURL(file)}
                   alt={`Upload ${index + 1}`}
-                  className="w-full h-20 object-cover rounded-lg"
+                  className="w-full h-16 md:h-20 object-cover rounded-lg"
                 />
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="absolute top-1 right-1 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 w-5 h-5 md:w-6 md:h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={() => removeFile(index)}
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-2 h-2 md:w-3 md:h-3" />
                 </Button>
               </div>
             ))}

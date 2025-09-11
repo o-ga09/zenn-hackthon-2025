@@ -6,22 +6,24 @@ import React from 'react'
 
 export default function QuickAction() {
   return (
-    <div className="grid md:grid-cols-2 gap-6 mb-12">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
       <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm hover:shadow-xl transition-shadow">
-        <CardHeader>
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-              <Plus className="w-6 h-6 text-primary" />
+        <CardHeader className="px-4 md:px-6 py-4 md:py-6">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+              <Plus className="w-5 h-5 md:w-6 md:h-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-xl">新しい動画を作成</CardTitle>
-              <CardDescription>写真をアップロードして新しい旅行動画を作成</CardDescription>
+              <CardTitle className="text-base md:text-lg lg:text-xl">新しい動画を作成</CardTitle>
+              <CardDescription className="text-xs md:text-sm">
+                写真をアップロードして新しい旅行動画を作成
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 md:px-6 py-3 md:py-4">
           <Link href="/upload">
-            <Button className="w-full bg-primary hover:bg-primary/90">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-sm md:text-base py-1.5 md:py-2 h-auto">
               <Upload className="w-4 h-4 mr-2" />
               写真をアップロード
             </Button>
@@ -30,18 +32,18 @@ export default function QuickAction() {
       </Card>
 
       <Card className="border-0 shadow-lg bg-card/50 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-xl">統計情報</CardTitle>
+        <CardHeader className="px-4 md:px-6 py-3 md:py-5">
+          <CardTitle className="text-base md:text-lg lg:text-xl">統計情報</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">12</div>
-              <div className="text-sm text-muted-foreground">作成した動画</div>
+        <CardContent className="px-4 md:px-6 py-2 md:py-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-6">
+            <div className="text-center p-2 bg-primary/5 rounded-lg">
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">12</div>
+              <div className="text-2xs md:text-sm text-muted-foreground">作成した動画</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-secondary">156</div>
-              <div className="text-sm text-muted-foreground">アップロード写真</div>
+            <div className="text-center p-2 bg-secondary/5 rounded-lg">
+              <div className="text-2xl md:text-3xl font-bold text-secondary mb-1">156</div>
+              <div className="text-2xs md:text-sm text-muted-foreground">アップロード写真</div>
             </div>
           </div>
         </CardContent>
