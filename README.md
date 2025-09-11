@@ -12,21 +12,20 @@
 
 | 構成要素        | 名称            |
 | --------------- | --------------- |
-| フロントエンド  | React           |
-| バックエンド    | Golang          |
-| AI エージェント | firebase genkit |
+| フロントエンド  | Next.js           |
+| バックエンド    | Next.js API Routes          |
+| AI エージェント | firebase genkit for Go |
 | データベース | TiDB |
 | ユーザー認証    | Firebase Auth          |
 
 ## フレームワーク
 
 - フロントエンド
-  - React
+  - Next.js
 - バックエンド
-  - Gin
-  - Gorm
+  - Next.js API Routes
 - AIエージェント
-  - Firebase Genkit
+  - Firebase Genkit for Go
 
 ## スタイリング
 
