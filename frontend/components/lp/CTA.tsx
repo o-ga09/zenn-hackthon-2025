@@ -1,6 +1,7 @@
 import { Sparkles } from 'lucide-react'
 import React from 'react'
 import { Button } from '../ui/button'
+import Link from 'next/link'
 
 export default function CTA() {
   return (
@@ -18,7 +19,7 @@ export default function CTA() {
             className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 shadow-lg"
           >
             <Sparkles className="w-5 h-5 mr-2" />
-            無料で動画を作成する
+            <Link href="/videos">無料で動画を作成する</Link>
           </Button>
         </div>
       </div>

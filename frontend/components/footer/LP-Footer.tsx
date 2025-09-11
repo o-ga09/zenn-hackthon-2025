@@ -13,13 +13,13 @@ export default function LPFooter() {
         </div>
         <p className="text-muted-foreground mb-4">旅の記録を、AIでもっと簡単に、もっとエモく。</p>
         <div className="flex justify-center space-x-6 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition-colors">
+          <a href="/privacy-policy" className="hover:text-foreground transition-colors">
             プライバシーポリシー
           </a>
-          <a href="#" className="hover:text-foreground transition-colors">
+          <a href="/terms-of-service" className="hover:text-foreground transition-colors">
             利用規約
           </a>
-          <a href="#" className="hover:text-foreground transition-colors">
+          <a href="/contact" className="hover:text-foreground transition-colors">
             お問い合わせ
           </a>
         </div>
