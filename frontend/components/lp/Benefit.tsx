@@ -9,8 +9,8 @@ export default function Benefit() {
           <h3 className="text-3xl font-bold text-foreground mb-6">なぜTravelMomentsを選ぶのか？</h3>
           <div className="space-y-6">
             <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <Heart className="w-4 h-4 text-primary" />
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Heart className="w-4 h-4 text-red-500" strokeWidth={2} />
               </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-2">エモーショナルな体験</h4>
@@ -21,8 +21,8 @@ export default function Benefit() {
             </div>
 
             <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-secondary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <Share2 className="w-4 h-4 text-secondary" />
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Share2 className="w-4 h-4 text-blue-500" strokeWidth={2} />
               </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-2">簡単シェア</h4>
@@ -33,8 +33,8 @@ export default function Benefit() {
             </div>
 
             <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-accent/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                <Star className="w-4 h-4 text-accent" />
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Star className="w-4 h-4 text-amber-500" strokeWidth={2} />
               </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-2">プロ品質</h4>
@@ -49,7 +49,7 @@ export default function Benefit() {
         <div className="relative">
           <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center">
             <div className="text-center">
-              <Camera className="w-16 h-16 text-primary mx-auto mb-4" />
+              <Camera className="w-16 h-16 text-purple-500 mx-auto mb-4" strokeWidth={1.5} />
               <p className="text-muted-foreground">動画プレビュー</p>
             </div>
           </div>

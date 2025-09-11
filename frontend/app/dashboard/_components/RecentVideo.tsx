@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { recentVideos } from '@/mock/mock'
-import { Play, Badge, Calendar, Download, Share2, Clock } from 'lucide-react'
+import { Play, Calendar, Download, Share2, Clock } from 'lucide-react'
 import React from 'react'
 
 export default function RecentVideo() {

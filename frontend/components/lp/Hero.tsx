@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from '../ui/button'
-import { Badge, Play, Sparkles, Video } from 'lucide-react'
+import { Badge } from '../ui/badge'
+import { Play, Sparkles, Video } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Hero() {

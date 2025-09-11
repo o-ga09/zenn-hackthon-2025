@@ -1,4 +1,4 @@
-import { Upload, Edit, Sparkles } from 'lucide-react'
+import { UploadCloud, FileText, WandSparkles } from 'lucide-react'
 import React from 'react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../ui/card'
 
@@ -15,8 +15,10 @@ export default function Feature() {
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
           <CardHeader>
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Upload className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+              <div className="text-orange-500">
+                <UploadCloud size={36} strokeWidth={2} />
+              </div>
             </div>
             <CardTitle className="text-2xl">写真をアップロード</CardTitle>
           </CardHeader>
@@ -29,8 +31,10 @@ export default function Feature() {
 
         <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
           <CardHeader>
-            <div className="w-16 h-16 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Edit className="w-8 h-8 text-secondary" />
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+              <div className="text-blue-500">
+                <FileText size={36} strokeWidth={2} />
+              </div>
             </div>
             <CardTitle className="text-2xl">旅行情報を入力</CardTitle>
           </CardHeader>
@@ -43,8 +47,10 @@ export default function Feature() {
 
         <Card className="text-center border-0 shadow-lg bg-card/50 backdrop-blur-sm">
           <CardHeader>
-            <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="w-8 h-8 text-accent" />
+            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+              <div className="text-purple-500">
+                <WandSparkles size={36} strokeWidth={2} />
+              </div>
             </div>
             <CardTitle className="text-2xl">AI動画生成</CardTitle>
           </CardHeader>

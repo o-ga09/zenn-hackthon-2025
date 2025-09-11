@@ -1,19 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { videos } from '@/mock/mock'
-import {
-  Search,
-  Filter,
-  Play,
-  Badge,
-  Clock,
-  Calendar,
-  Download,
-  Share2,
-  Edit,
-  Trash2,
-} from 'lucide-react'
+import { Search, Filter, Play, Clock, Calendar, Download, Share2, Edit, Trash2 } from 'lucide-react'
 import React from 'react'
 
 export default function Library() {
