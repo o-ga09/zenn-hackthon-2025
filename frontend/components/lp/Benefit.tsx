@@ -4,7 +4,7 @@ import React from 'react'
 export default function Benefit() {
   return (
     <section className="container mx-auto px-4 py-20">
-      <div className="grid lg:grid-cols-2 gap-16 items-center max-w-6xl mx-auto">
+      <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-5xl mx-auto">
         <div>
           <h3 className="text-3xl font-bold text-foreground mb-6">なぜTravelMomentsを選ぶのか？</h3>
           <div className="space-y-6">
@@ -46,11 +46,11 @@ export default function Benefit() {
           </div>
         </div>
 
-        <div className="relative">
-          <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center">
+        <div className="relative flex items-center justify-center">
+          <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl flex items-center justify-center max-w-[280px] w-full mx-auto">
             <div className="text-center">
-              <Camera className="w-16 h-16 text-purple-500 mx-auto mb-4" strokeWidth={1.5} />
-              <p className="text-muted-foreground">動画プレビュー</p>
+              <Camera className="w-12 h-12 text-purple-500 mx-auto mb-3" strokeWidth={1.5} />
+              <p className="text-muted-foreground text-sm">動画プレビュー</p>
             </div>
           </div>
         </div>
