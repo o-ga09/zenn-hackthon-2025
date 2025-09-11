@@ -58,59 +58,83 @@ export default function Benefit() {
   }, [isPaused])
 
   return (
-    <section className="container mx-auto px-4 min-h-screen flex items-center py-10">
-      <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-5xl mx-auto">
-        <div>
-          <h3 className="text-3xl font-bold text-foreground mb-6">なぜTravelMomentsを選ぶのか？</h3>
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                <Heart className="w-4 h-4 text-red-500" strokeWidth={2} />
+    <section className="container mx-auto px-4 min-h-screen flex items-center py-10 sm:py-16">
+      <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center max-w-5xl mx-auto">
+        <div className="order-2 lg:order-1">
+          <h3 className="text-2xl sm:text-3xl font-bold text-foreground mb-4 sm:mb-6 text-center lg:text-left">
+            なぜTravelMomentsを選ぶのか？
+          </h3>
+          <div className="grid sm:grid-cols-1 gap-4 sm:gap-6">
+            <motion.div
+              className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg hover:bg-background/50 transition-colors"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" strokeWidth={2} />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">エモーショナルな体験</h4>
-                <p className="text-muted-foreground">
+                <h4 className="font-semibold text-foreground mb-1 sm:mb-2 text-lg">
+                  エモーショナルな体験
+                </h4>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   AIが写真から感情を読み取り、その瞬間にぴったりの音楽とエフェクトを選択します。
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                <Share2 className="w-4 h-4 text-blue-500" strokeWidth={2} />
+            <motion.div
+              className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg hover:bg-background/50 transition-colors"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" strokeWidth={2} />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">簡単シェア</h4>
-                <p className="text-muted-foreground">
+                <h4 className="font-semibold text-foreground mb-1 sm:mb-2 text-lg">簡単シェア</h4>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   YouTube ShortsやInstagramストーリーズに最適化された縦画面動画を生成します。
                 </p>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-start space-x-4">
-              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                <Star className="w-4 h-4 text-amber-500" strokeWidth={2} />
+            <motion.div
+              className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-lg hover:bg-background/50 transition-colors"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
+                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" strokeWidth={2} />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-2">プロ品質</h4>
-                <p className="text-muted-foreground">
+                <h4 className="font-semibold text-foreground mb-1 sm:mb-2 text-lg">プロ品質</h4>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   高度なAI技術により、プロが作ったような高品質な動画を自動生成します。
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="relative overflow-hidden py-8">
+        <div className="relative order-1 lg:order-2">
+          <div className="relative overflow-hidden py-6 sm:py-8">
             {/* メインのカードショーケース */}
             <div
               className="flex justify-center"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
             >
               <motion.div
-                className="w-[280px] mx-auto relative"
+                className="w-[240px] sm:w-[280px] mx-auto relative"
                 animate={controls}
                 initial={{ opacity: 0, scale: 0.8 }}
                 transition={{
@@ -120,7 +144,7 @@ export default function Benefit() {
                   duration: 0.4,
                 }}
               >
-                <div className="aspect-[9/16] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl overflow-hidden relative shadow-lg">
+                <div className="aspect-[9/16] bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl sm:rounded-2xl overflow-hidden relative shadow-lg">
                   <Image
                     src={anyOneVideos[currentIndex].thumbnail || '/placeholder.webp'}
                     alt={anyOneVideos[currentIndex].title}

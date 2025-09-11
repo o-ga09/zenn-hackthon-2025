@@ -15,7 +15,7 @@ export default function CTA() {
       transition={{ duration: 0.8 }}
     >
       <motion.div
-        className="bg-gradient-to-br from-primary/90 via-primary/70 to-primary/40 rounded-3xl p-12 text-center text-white relative overflow-hidden w-full"
+        className="bg-gradient-to-br from-primary/90 via-primary/70 to-primary/40 rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-12 text-center text-white relative overflow-hidden w-full"
         initial={{ scale: 0.95, y: 30 }}
         whileInView={{ scale: 1, y: 0 }}
         viewport={{ once: true, margin: '-100px' }}
@@ -27,14 +27,14 @@ export default function CTA() {
         }}
       >
         <motion.div
-          className="absolute inset-0 bg-white/10 rounded-3xl backdrop-blur-[2px]"
+          className="absolute inset-0 bg-white/10 rounded-2xl sm:rounded-3xl backdrop-blur-[2px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         ></motion.div>
         <div className="relative z-10">
           <motion.h3
-            className="text-4xl font-bold mb-4 text-white drop-shadow-lg"
+            className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 text-white drop-shadow-lg"
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -43,7 +43,7 @@ export default function CTA() {
             今すぐ始めよう
           </motion.h3>
           <motion.p
-            className="text-xl mb-8 text-white/95 max-w-2xl mx-auto drop-shadow-md"
+            className="text-base sm:text-lg md:text-xl mb-5 sm:mb-8 text-white/95 max-w-2xl mx-auto drop-shadow-md"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
@@ -58,11 +58,12 @@ export default function CTA() {
             transition={{ duration: 0.7, delay: 0.7 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            className="w-full sm:w-auto inline-block"
           >
             <Button
               size="lg"
               variant="secondary"
-              className="text-lg px-8 py-6 bg-white text-primary hover:bg-white/90 shadow-lg"
+              className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 bg-white text-primary hover:bg-white/90 shadow-lg w-full sm:w-auto"
             >
               <motion.div
                 initial={{ rotate: -10 }}

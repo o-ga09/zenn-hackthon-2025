@@ -44,22 +44,24 @@ export default function Feature() {
   }
 
   return (
-    <section className="container mx-auto px-4 min-h-screen flex flex-col justify-center py-10">
+    <section className="container mx-auto px-4 min-h-screen flex flex-col justify-center py-10 sm:py-16">
       <motion.div
-        className="text-center mb-16"
+        className="text-center mb-10 sm:mb-16"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-100px' }}
         transition={{ duration: 0.7 }}
       >
-        <h2 className="text-4xl font-bold text-foreground mb-4">3つのステップで完成</h2>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3 sm:mb-4">
+          3つのステップで完成
+        </h2>
+        <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto px-2">
           複雑な編集作業は不要。シンプルな操作で、プロ品質の動画が完成します。
         </p>
       </motion.div>
 
       <motion.div
-        className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
+        className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-5xl mx-auto"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
