@@ -58,7 +58,7 @@ export default function Benefit() {
   }, [isPaused])
 
   return (
-    <section className="container mx-auto px-4 py-20">
+    <section className="container mx-auto px-4 min-h-screen flex items-center py-10">
       <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center max-w-5xl mx-auto">
         <div>
           <h3 className="text-3xl font-bold text-foreground mb-6">なぜTravelMomentsを選ぶのか？</h3>
