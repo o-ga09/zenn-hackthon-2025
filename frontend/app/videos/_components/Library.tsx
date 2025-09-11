@@ -1,32 +1,280 @@
+'use client'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { videos } from '@/mock/mock'
-import { Search, Filter, Play, Clock, Calendar, Download, Share2, Edit, Trash2 } from 'lucide-react'
-import React from 'react'
+import {
+  Search,
+  Filter,
+  Play,
+  Clock,
+  Calendar,
+  Download,
+  Share2,
+  Trash2,
+  CheckCircle,
+  X,
+} from 'lucide-react'
+import React, { useState, useEffect, useMemo } from 'react'
+
+// フィルタータイプの定義
+type FilterStatus = '全て' | '完成' | '処理中'
+type SortOrder = '新しい順' | '古い順' | '人気順'
 
 export default function Library() {
+  // ステート設定
+  const [searchTerm, setSearchTerm] = useState('')
+  const [displayCount, setDisplayCount] = useState(6)
+  const [statusFilter, setStatusFilter] = useState<FilterStatus>('全て')
+  const [sortOrder, setSortOrder] = useState<SortOrder>('新しい順')
+  const [showFilterMenu, setShowFilterMenu] = useState(false)
+
+  // フィルター適用したビデオリスト
+  const filteredVideos = useMemo(() => {
+    // 1. 検索条件を適用
+    let filtered = videos.filter(
+      video =>
+        video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        video.date.includes(searchTerm)
+    )
+
+    // 2. ステータスフィルターを適用
+    if (statusFilter !== '全て') {
+      filtered = filtered.filter(video => video.status === statusFilter)
+    }
+
+    // 3. ソート順を適用
+    return filtered.sort((a, b) => {
+      if (sortOrder === '新しい順') {
+        // 日付を比較（新しい順）- 簡易実装のため日付文字列をそのまま比較
+        return b.date.localeCompare(a.date)
+      } else if (sortOrder === '古い順') {
+        // 日付を比較（古い順）
+        return a.date.localeCompare(b.date)
+      } else {
+        // 人気順（いいね数）
+        return (b.likes || 0) - (a.likes || 0)
+      }
+    })
+  }, [searchTerm, statusFilter, sortOrder])
+
+  // 表示する動画
+  const displayedVideos = useMemo(() => {
+    return filteredVideos.slice(0, displayCount)
+  }, [filteredVideos, displayCount])
+
+  // さらに読み込む機能
+  const handleLoadMore = () => {
+    setDisplayCount(prevCount => prevCount + 6)
+  }
+
+  // 検索入力の処理
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+    // 検索時は表示件数をリセット
+    setDisplayCount(6)
+  }
+
+  // フィルター適用
+  const applyFilter = (status: FilterStatus) => {
+    setStatusFilter(status)
+    setShowFilterMenu(false)
+    setDisplayCount(6) // フィルター変更時にリセット
+  }
+
+  // ソート順変更
+  const applySort = (order: SortOrder) => {
+    setSortOrder(order)
+    setShowFilterMenu(false)
+    setDisplayCount(6) // ソート変更時にリセット
+  }
+
+  // フィルターメニュー外のクリックを検知して閉じる
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (showFilterMenu && !target.closest('.filter-container')) {
+        setShowFilterMenu(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showFilterMenu])
+
   return (
     <>
-      <Card className="border-0 shadow-md bg-card/50 backdrop-blur-sm mb-6">
+      <Card className="border-0 shadow-md bg-card/50 backdrop-blur-sm mb-6 relative z-[996]">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input placeholder="動画を検索..." className="pl-10 h-10" />
+              <Input
+                placeholder="動画を検索..."
+                className="pl-10 h-10"
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
             </div>
-            <Button variant="outline" className="flex items-center space-x-2 bg-transparent h-10">
-              <Filter className="w-4 h-4" />
-              <span>フィルター</span>
-            </Button>
+            <div className="relative filter-container z-[997]">
+              <Button
+                variant="outline"
+                className="flex items-center space-x-2 bg-transparent h-10 w-full md:w-auto justify-center md:justify-start relative z-[997]"
+                onClick={() => setShowFilterMenu(!showFilterMenu)}
+              >
+                <Filter className="w-4 h-4" />
+                <span>フィルター</span>
+                {statusFilter !== '全て' && (
+                  <Badge className="ml-2 bg-primary text-white">{statusFilter}</Badge>
+                )}
+              </Button>
+
+              {/* フィルターメニュー */}
+              {showFilterMenu && (
+                <>
+                  {/* オーバーレイ背景 - モバイル表示のみ */}
+                  <div
+                    className="fixed inset-0 bg-black/50 z-[998] md:hidden"
+                    onClick={() => setShowFilterMenu(false)}
+                  ></div>
+
+                  {/* フィルターメニュー本体 */}
+                  <div className="fixed md:absolute right-4 md:right-0 left-4 md:left-auto top-[4rem] md:top-full mt-1 w-auto md:w-56 bg-white shadow-lg rounded-md p-2 z-[999] border max-h-[calc(100vh-8rem)] overflow-auto">
+                    <div className="sticky top-0 bg-white pt-1 text-sm font-medium text-gray-600 pb-1 mb-1 border-b flex justify-between items-center">
+                      <span>フィルター設定</span>
+                      <button
+                        onClick={() => setShowFilterMenu(false)}
+                        className="md:hidden text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="text-sm font-medium text-gray-600 pb-1 mb-1">ステータス</div>
+                    <div className="flex flex-col space-y-1 mb-3">
+                      <button
+                        onClick={() => applyFilter('全て')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          statusFilter === '全て'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        全て
+                        {statusFilter === '全て' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => applyFilter('完成')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          statusFilter === '完成'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        完成
+                        {statusFilter === '完成' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => applyFilter('処理中')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          statusFilter === '処理中'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        処理中
+                        {statusFilter === '処理中' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    <div className="text-sm font-medium text-gray-600 pb-1 mb-1 border-b">
+                      並び順
+                    </div>
+                    <div className="flex flex-col space-y-1">
+                      <button
+                        onClick={() => applySort('新しい順')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          sortOrder === '新しい順'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        新しい順
+                        {sortOrder === '新しい順' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => applySort('古い順')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          sortOrder === '古い順'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        古い順
+                        {sortOrder === '古い順' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={() => applySort('人気順')}
+                        className={`flex items-center px-2 py-1 text-sm rounded-md transition-colors ${
+                          sortOrder === '人気順'
+                            ? 'bg-primary/10 text-primary'
+                            : 'hover:bg-gray-100'
+                        }`}
+                      >
+                        人気順
+                        {sortOrder === '人気順' && <CheckCircle className="ml-auto w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
+      {/* フィルター条件の表示 */}
+      {(statusFilter !== '全て' || sortOrder !== '新しい順') && (
+        <div className="mb-4 flex flex-wrap gap-2 items-center">
+          <span className="text-sm text-muted-foreground">フィルター:</span>
+          {statusFilter !== '全て' && (
+            <Badge variant="outline" className="flex items-center gap-1 py-1">
+              ステータス: {statusFilter}
+            </Badge>
+          )}
+          {sortOrder !== '新しい順' && (
+            <Badge variant="outline" className="flex items-center gap-1 py-1">
+              並び順: {sortOrder}
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => {
+              setStatusFilter('全て')
+              setSortOrder('新しい順')
+              setDisplayCount(6)
+            }}
+          >
+            リセット
+          </Button>
+        </div>
+      )}
+
+      {/* 検索結果がない場合のメッセージ */}
+      {filteredVideos.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-muted-foreground">検索結果が見つかりませんでした。</p>
+        </div>
+      )}
+
       {/* Videos Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-        {videos.map(video => (
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 relative z-[1]">
+        {displayedVideos.map(video => (
           <div
             key={video.id}
             className="relative overflow-hidden group rounded-lg shadow-sm hover:shadow-md transition-shadow"
@@ -111,12 +359,14 @@ export default function Library() {
         ))}
       </div>
 
-      {/* Load More */}
-      <div className="text-center mt-8">
-        <Button variant="outline" size="lg">
-          さらに読み込む
-        </Button>
-      </div>
+      {/* Load More - 表示できる動画がまだある場合のみ表示 */}
+      {displayedVideos.length < filteredVideos.length && (
+        <div className="text-center mt-8">
+          <Button variant="outline" size="lg" onClick={handleLoadMore}>
+            さらに読み込む ({filteredVideos.length - displayedVideos.length}件)
+          </Button>
+        </div>
+      )}
     </>
   )
 }
