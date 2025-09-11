@@ -14,19 +14,29 @@ export default function Hero() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
+          className="mb-14 md:mb-16"
         >
-          <Badge className="mb-6 bg-secondary/20 text-secondary-foreground border-secondary/30">
-            <Sparkles className="w-4 h-4 mr-2" />
+          <Badge className="py-2 px-4 text-base md:text-lg bg-primary text-white font-medium border-primary hover:bg-primary/90 transition-colors shadow-md">
+            <Sparkles className="w-5 h-5 mr-2 text-white" />
             AI搭載の新しい旅行体験
           </Badge>
         </motion.div>
 
         <motion.h1
-          className="text-5xl md:text-7xl font-bold text-foreground mb-6 text-balance"
+          className="text-5xl md:text-7xl font-bold text-foreground mb-6 text-balance relative"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
+          <motion.div
+            className="absolute -top-6 md:-top-8 right-[calc(50%-100px)] md:right-[calc(50%-140px)] bg-primary text-white px-5 py-2 rounded-xl text-lg md:text-xl font-bold shadow-lg"
+            initial={{ opacity: 0, scale: 0.5, rotate: -5 }}
+            animate={{ opacity: 1, scale: 1, rotate: 5 }}
+            transition={{ duration: 0.5, delay: 1.2, type: 'spring', bounce: 0.4 }}
+          >
+            <div className="absolute -bottom-3 right-5 h-4 w-4 bg-primary rotate-45"></div>
+            動画で
+          </motion.div>
           旅の記録を、
           <br />
           <motion.span
