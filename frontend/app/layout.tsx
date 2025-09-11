@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 import NextTopLoader from 'nextjs-toploader'
 import { topLoaderConfig } from '@/lib/utils'
+import { ApiProvider } from '@/api/apiProvider'
+import { AuthProvider } from '@/context/authContext'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -82,8 +84,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="overflow-x-hidden" suppressHydrationWarning>
-        <NextTopLoader {...topLoaderConfig} />
-        {children}
+        <ApiProvider>
+          <AuthProvider>
+            <NextTopLoader {...topLoaderConfig} />
+            {children}
+          </AuthProvider>
+        </ApiProvider>
       </body>
     </html>
   )
