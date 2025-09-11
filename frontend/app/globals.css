@@ -119,4 +119,9 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* スクロールバーを非表示にするクラス */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
