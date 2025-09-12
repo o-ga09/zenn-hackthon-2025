@@ -1,0 +1,12 @@
+-- +migrate Up
+ALTER TABLE user_details 
+MODIFY COLUMN birthday DATE NULL COMMENT '誕生日',
+MODIFY COLUMN gender INT NULL COMMENT '性別',
+MODIFY COLUMN profile_url VARCHAR(255) NULL COMMENT 'プロフィールURL';
+
+-- +migrate Down
+ALTER TABLE user_details 
+MODIFY COLUMN birthday DATE NOT NULL COMMENT '誕生日',
+MODIFY COLUMN gender INT NOT NULL COMMENT '性別',
+MODIFY COLUMN profile_url VARCHAR(255) NOT NULL COMMENT 'プロフィールURL';
+
