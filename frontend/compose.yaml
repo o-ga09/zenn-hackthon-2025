@@ -1,0 +1,36 @@
+version: '3.9'
+services:
+  db:
+    container_name: db
+    image: mysql:8.0
+    platform: linux/x86_64
+    environment:
+      MYSQL_ROOT_PASSWORD: P@ssw0rd
+      MYSQL_DATABASE: tavinikkiy
+      MYSQL_USER: user
+      MYSQL_PASSWORD: P@ssw0rd
+    ports:
+      - '3306:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./db/sql:/docker-entrypoint-initdb.d
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - '4566:4566'
+      - '4510-4559:4510-4559'
+    environment:
+      - SERVICES=s3
+      - AWS_DEFAULT_REGION=ap-northeast-1
+      - EDGE_PORT=4566
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - DEFAULT_REGION=ap-northeast-1
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - ./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh
+      - './data:/home/localstack/data'
+volumes:
+  db_data:
