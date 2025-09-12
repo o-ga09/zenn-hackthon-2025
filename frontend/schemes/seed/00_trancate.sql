@@ -1,0 +1,11 @@
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE user_social_accounts;
+TRUNCATE TABLE user_groups;
+TRUNCATE TABLE user_relationships;
+TRUNCATE TABLE user_details;
+TRUNCATE TABLE users;
+TRUNCATE TABLE travels;
+TRUNCATE TABLE costs;
+TRUNCATE TABLE locations;
+TRUNCATE TABLE memories;
+SET FOREIGN_KEY_CHECKS = 1;
