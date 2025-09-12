@@ -11,7 +11,10 @@
     "format": "prettier --check \"src/**/*.{ts,tsx}\"",
     "format:fix": "prettier --write \"src/**/*.{ts,tsx}\"",
     "prisma:generate": "prisma generate --schema=./schemes/prisma/schema.prisma",
-    "prisma:studio": "prisma studio --schema=./schemes/prisma/schema.prisma"
+    "prisma:studio": "prisma studio --schema=./schemes/prisma/schema.prisma",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down -v",
+    "db:migrate": "sql-migrate up"
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.2",
