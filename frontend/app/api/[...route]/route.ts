@@ -324,6 +324,39 @@ app.delete('/users/:id', async c => {
   }
 })
 
+// ユーザーの画像アップロード数と動画アップロード数を取得
+app.get('/users/:id/uploads', async c => {
+  const userId = c.req.param('id')
+
+  // ユーザー存在確認（論理削除チェック含む）
+  const user = await prisma.user.findUnique({ where: { id: userId, deleteDatetime: null } })
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+
+  try {
+    // memories テーブルと travels を結合して集計
+    const rows: any = await prisma.$queryRaw`
+      SELECT
+        COALESCE(SUM(CASE WHEN m.photo_url IS NOT NULL AND m.photo_url != '' THEN 1 ELSE 0 END),0) AS photo_count,
+        COALESCE(SUM(CASE WHEN m.video_url IS NOT NULL AND m.video_url != '' THEN 1 ELSE 0 END),0) AS video_count
+      FROM memories m
+      JOIN travels t ON m.travel_id = t.id
+      WHERE t.user_id = ${userId} AND m.delete_datetime IS NULL
+    `
+
+    const row = Array.isArray(rows) && rows.length > 0 ? rows[0] : rows
+
+    const photoCount = Number(row.photo_count ?? 0)
+    const videoCount = Number(row.video_count ?? 0)
+
+    return c.json({ photoCount, videoCount })
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: 'Failed to fetch upload counts' }, 500)
+  }
+})
+
 // === 旅行関連 API ===
 // 旅行一覧取得
 app.get('/travels', async c => {
@@ -357,6 +390,132 @@ app.get('/travels/:id', async c => {
   }
 
   return c.json({ travel })
+})
+
+// 思い出一覧取得 (GET) と 思い出作成 (POST)
+const createMemorySchema = z.object({
+  date: z.string(),
+  photoUrl: z.string().url(),
+  description: z.string().optional(),
+})
+
+app.get('/travels/:id/memory', async c => {
+  const travelId = c.req.param('id')
+
+  // 旅行の存在確認
+  const travel = await prisma.travel.findUnique({ where: { id: travelId, deleteDatetime: null } })
+  if (!travel) {
+    return c.json({ error: 'Travel not found' }, 404)
+  }
+
+  const memories = await prisma.memory.findMany({
+    where: { travelId, deleteDatetime: null },
+    orderBy: { date: 'desc' },
+  })
+
+  return c.json({ memories })
+})
+
+app.post('/travels/:id/memory', zValidator('json', createMemorySchema), async c => {
+  const travelId = c.req.param('id')
+  const data = c.req.valid('json') as z.infer<typeof createMemorySchema>
+
+  // 旅行の存在確認
+  const travel = await prisma.travel.findUnique({ where: { id: travelId, deleteDatetime: null } })
+  if (!travel) {
+    return c.json({ error: 'Travel not found' }, 404)
+  }
+
+  try {
+    const memoryId = ulid()
+    const created = await prisma.memory.create({
+      data: {
+        id: memoryId,
+        travelId,
+        photoUrl: data.photoUrl,
+        description: data.description ?? '',
+        date: new Date(data.date),
+      },
+    })
+
+    return c.json({ memory: created }, 200)
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: 'Failed to create memory' }, 500)
+  }
+})
+
+const updateMemorySchema = z.object({
+  date: z.string().optional(),
+  photoUrl: z.string().url().optional(),
+  description: z.string().optional(),
+})
+
+// 思い出更新
+app.put('/travels/:id/memory/:memoryId', zValidator('json', updateMemorySchema), async c => {
+  const travelId = c.req.param('id')
+  const memoryId = c.req.param('memoryId')
+  const data = c.req.valid('json') as z.infer<typeof updateMemorySchema>
+
+  // 旅行の存在確認
+  const travel = await prisma.travel.findUnique({ where: { id: travelId, deleteDatetime: null } })
+  if (!travel) {
+    return c.json({ error: 'Travel not found' }, 404)
+  }
+
+  // 思い出の存在確認
+  const existing = await prisma.memory.findUnique({ where: { id: memoryId } })
+  if (!existing || existing.deleteDatetime) {
+    return c.json({ error: 'Memory not found' }, 404)
+  }
+
+  try {
+    const updateData: any = {}
+    if (data.photoUrl) updateData.photoUrl = data.photoUrl
+    if (data.description !== undefined) updateData.description = data.description
+    if (data.date) updateData.date = new Date(data.date)
+
+    const updated = await prisma.memory.update({
+      where: { id: memoryId },
+      data: updateData,
+    })
+
+    return c.json({ memory: updated })
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: 'Failed to update memory' }, 500)
+  }
+})
+
+// 思い出削除（論理削除）
+app.delete('/travels/:id/memory/:memoryId', async c => {
+  const travelId = c.req.param('id')
+  const memoryId = c.req.param('memoryId')
+
+  // 旅行の存在確認
+  const travel = await prisma.travel.findUnique({ where: { id: travelId, deleteDatetime: null } })
+  if (!travel) {
+    return c.json({ error: 'Travel not found' }, 404)
+  }
+
+  // 思い出の存在確認
+  const existing = await prisma.memory.findUnique({ where: { id: memoryId } })
+  if (!existing || existing.deleteDatetime) {
+    return c.json({ error: 'Memory not found' }, 404)
+  }
+
+  try {
+    const now = new Date()
+    await prisma.memory.update({
+      where: { id: memoryId },
+      data: { deleteDatetime: now },
+    })
+
+    return c.json({ message: 'Memory deleted successfully' })
+  } catch (error) {
+    console.error(error)
+    return c.json({ error: 'Failed to delete memory' }, 500)
+  }
 })
 
 // 旅行作成
