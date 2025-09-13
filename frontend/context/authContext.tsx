@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { encodeUserDataForCookie } from '@/lib/utils'
 import CSRFManager from '@/lib/utils'
-import apiClient from '@/api/client'
+import apiClient, { setCurrentUserID } from '@/api/client'
 
 interface AuthContextType {
   user: User | null
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await apiClient.get(`/firebaseUsers/${fbId}`)
       console.log('Fetched API user data:', response.data)
-      setApiUser({
+      const userFromApi = {
         id: response.data.user.id,
         userID: response.data.user.userId,
         version: response.data.user.version,
@@ -70,7 +70,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         photoURL: response.data.user.photoURL,
         email: response.data.user.email,
         birthDay: response.data.user.birthDay,
-      })
+      }
+      setApiUser(userFromApi)
+
+      // APIから取得したユーザーIDを設定
+      if (response.data.user.userId) {
+        setCurrentUserID(response.data.user.userId)
+      }
+
       return response.data
     } catch (error) {
       setApiError(error)
@@ -245,6 +252,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setCachedToken(null)
       setTokenExpiryTime(0)
       setTokenCreatedTime(0)
+
+      // currentUserIDをリセット
+      setCurrentUserID('')
 
       // ローカルストレージをクリア
       localStorage.removeItem('tavinikkiy-user')
