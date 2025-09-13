@@ -25,7 +25,7 @@ app.use('*', async (c, next) => {
       // 成功レスポンスの場合は形式を統一
       const newResponse = {
         success: true,
-        data: originalBody,
+        ...originalBody,
       }
       // 新しいレスポンスを設定
       c.res = new Response(JSON.stringify(newResponse), {
@@ -325,7 +325,7 @@ app.delete('/users/:id', async c => {
 // === 旅行関連 API ===
 // 旅行一覧取得
 app.get('/travels', async c => {
-  const userId = c.req.query('userId')
+  const userId = c.req.header('X-Tavinikkiy-User')
 
   const where = userId ? { userId, deleteDatetime: null } : { deleteDatetime: null }
 
