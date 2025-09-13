@@ -42,7 +42,7 @@ export default function QuickAction() {
               <div className="text-2xs md:text-sm text-muted-foreground">作成した動画</div>
             </div>
             <div className="text-center p-2 bg-secondary/5 rounded-lg">
-              <div className="text-2xl md:text-3xl font-bold text-secondary mb-1">156</div>
+              <div className="text-2xl md:text-3xl font-bold text-primary mb-1">156</div>
               <div className="text-2xs md:text-sm text-muted-foreground">アップロード写真</div>
             </div>
           </div>
