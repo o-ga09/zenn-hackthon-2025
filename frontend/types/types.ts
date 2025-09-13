@@ -1,5 +1,6 @@
 export interface User {
   id: string | undefined
+  userID: string
   version?: number | null
   uid: string
   username: string | null
