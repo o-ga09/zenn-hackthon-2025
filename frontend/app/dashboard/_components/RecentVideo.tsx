@@ -5,10 +5,14 @@ import { Play, Calendar, Download, Share2 } from 'lucide-react'
 import React from 'react'
 import { useGetTravelsByUserId } from '@/api/travelApi'
 import { useAuth } from '@/context/authContext'
+import { Travel } from '@/api/types'
+import TravelDetailSheet from './TravelDetailSheet'
 
 export default function RecentVideo() {
   const { user, loading } = useAuth()
   const userId = user?.id || ''
+  const [selectedTravel, setSelectedTravel] = React.useState<Travel | null>(null)
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
 
   const { data: travelsData, isLoading: isTravelsLoading } = useGetTravelsByUserId(userId)
   const travels = travelsData?.travels || []
@@ -19,6 +23,12 @@ export default function RecentVideo() {
     .slice(0, 3)
 
   const isLoading = loading || isTravelsLoading
+
+  // 旅行をクリックしたときの処理
+  const handleTravelClick = (travel: Travel) => {
+    setSelectedTravel(travel)
+    setIsSheetOpen(true)
+  }
 
   // 期間から動画の長さを簡易計算（実際は動画の長さはAPIから取得するべき）
   const calculateDuration = (startDate: string, endDate: string): string => {
@@ -52,7 +62,11 @@ export default function RecentVideo() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
           {recentTravels.map(travel => (
-            <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
+            <div
+              key={travel.id}
+              className="relative aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden cursor-pointer group"
+              onClick={() => handleTravelClick(travel)}
+            >
               <img
                 src={travel.thumbnail || '/placeholder.webp'}
                 alt={travel.title}
@@ -118,6 +132,13 @@ export default function RecentVideo() {
           ))}
         </div>
       )}
+
+      {/* 旅行詳細シート */}
+      <TravelDetailSheet
+        travel={selectedTravel}
+        isOpen={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+      />
     </div>
   )
 }
