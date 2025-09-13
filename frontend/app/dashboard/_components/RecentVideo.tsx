@@ -1,10 +1,37 @@
+'use client'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { recentVideos } from '@/mock/mock'
-import { Play, Calendar, Download, Share2, Clock } from 'lucide-react'
+import { Play, Calendar, Download, Share2 } from 'lucide-react'
 import React from 'react'
+import { useGetTravelsByUserId } from '@/api/travelApi'
+import { useAuth } from '@/context/authContext'
 
 export default function RecentVideo() {
+  const { user, loading } = useAuth()
+  const userId = user?.id || ''
+
+  const { data: travelsData, isLoading: isTravelsLoading } = useGetTravelsByUserId(userId)
+  const travels = travelsData?.travels || []
+
+  // 最新の3件のみ表示（更新日時でソート）
+  const recentTravels = [...travels]
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 3)
+
+  const isLoading = loading || isTravelsLoading
+
+  // 期間から動画の長さを簡易計算（実際は動画の長さはAPIから取得するべき）
+  const calculateDuration = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    // 分と秒の表記として、日数に基づいて簡易的に生成
+    return `${Math.max(1, Math.min(5, days))}:${String(Math.floor(Math.random() * 60)).padStart(
+      2,
+      '0'
+    )}`
+  }
+
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between mb-3 md:mb-4">
@@ -14,46 +41,46 @@ export default function RecentVideo() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-        {recentVideos.map(video => (
-          <div
-            key={video.id}
-            className="relative overflow-hidden group rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : recentTravels.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
+          動画がありません。新しい旅行を追加してみましょう！
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          {recentTravels.map(travel => (
             <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
               <img
-                src={video.thumbnail || '/placeholder.webp'}
-                alt={video.title}
+                src={travel.thumbnail || '/placeholder.webp'}
+                alt={travel.title}
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
-
               {/* Gradient overlay for better text visibility */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
-
               {/* Content overlay (positioned at the bottom only) */}
               <div className="absolute bottom-0 left-0 right-0 p-2">
                 {/* Top-right badge for duration */}
                 <Badge className="absolute top-2 right-2 text-2xs md:text-xs bg-black/60 text-white">
-                  {video.duration}
+                  {calculateDuration(travel.startDate, travel.endDate)}
                 </Badge>
-
-                {/* Status badge (only shown for non-completed) */}
-                {video.status !== '完成' && (
-                  <Badge className="absolute top-2 left-2 text-2xs md:text-xs bg-yellow-500/80 text-black">
-                    {video.status}
-                  </Badge>
-                )}
 
                 {/* Bottom content */}
                 <div className="text-white">
                   <h3 className="font-medium text-sm md:text-base line-clamp-1 mb-0.5">
-                    {video.title}
+                    {travel.title}
                   </h3>
                   <div className="flex items-center text-2xs md:text-xs text-white/80">
                     <div className="flex items-center">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {video.date}
+                      {new Date(travel.startDate).toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
                     </div>
                   </div>
                 </div>
@@ -88,9 +115,9 @@ export default function RecentVideo() {
                 </Button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

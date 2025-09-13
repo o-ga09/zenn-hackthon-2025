@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { videos } from '@/mock/mock'
 import {
   Search,
   Filter,
@@ -17,6 +16,8 @@ import {
   X,
 } from 'lucide-react'
 import React, { useState, useEffect, useMemo } from 'react'
+import { useGetTravelsByUserId } from '@/api/travelApi'
+import { useAuth } from '@/context/authContext'
 
 // フィルタータイプの定義
 type FilterStatus = '全て' | '完成' | '処理中'
@@ -30,10 +31,51 @@ export default function Library() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('新しい順')
   const [showFilterMenu, setShowFilterMenu] = useState(false)
 
+  // ユーザー情報取得
+  const { user, loading } = useAuth()
+  const userId = user?.id || ''
+
+  // 旅行データ取得
+  const { data: travelsData, isLoading: isTravelsLoading } = useGetTravelsByUserId(userId)
+  const allTravels = travelsData?.travels || []
+  console.log(travelsData?.travels.length)
+
+  // APIデータをビデオリスト形式に変換
+  const videosFromApi = useMemo(() => {
+    return allTravels.map(travel => ({
+      id: travel.id,
+      title: travel.title,
+      date: new Date(travel.startDate).toLocaleDateString('ja-JP', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      }),
+      thumbnail: travel.thumbnail || '/placeholder.webp',
+      duration: calculateDuration(travel.startDate, travel.endDate),
+      status: '完成', // APIからステータスを取得できるようになったら変更する
+      views: Math.floor(Math.random() * 500), // APIからビュー数を取得できるようになったら変更する
+      likes: Math.floor(Math.random() * 100), // APIからいいね数を取得できるようになったら変更する
+      startDate: travel.startDate,
+      endDate: travel.endDate,
+      description: travel.description,
+    }))
+  }, [allTravels])
+
+  // 期間から動画の長さを簡易計算
+  function calculateDuration(startDate: string, endDate: string): string {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
+    return `${Math.max(1, Math.min(5, days))}:${String(Math.floor(Math.random() * 60)).padStart(
+      2,
+      '0'
+    )}`
+  }
+
   // フィルター適用したビデオリスト
   const filteredVideos = useMemo(() => {
     // 1. 検索条件を適用
-    let filtered = videos.filter(
+    let filtered = videosFromApi.filter(
       video =>
         video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         video.date.includes(searchTerm)
@@ -63,6 +105,9 @@ export default function Library() {
   const displayedVideos = useMemo(() => {
     return filteredVideos.slice(0, displayCount)
   }, [filteredVideos, displayCount])
+
+  // ローディング状態
+  const isLoading = loading || isTravelsLoading
 
   // さらに読み込む機能
   const handleLoadMore = () => {
@@ -235,7 +280,6 @@ export default function Library() {
           </div>
         </CardContent>
       </Card>
-
       {/* フィルター条件の表示 */}
       {(statusFilter !== '全て' || sortOrder !== '新しい順') && (
         <div className="mb-4 flex flex-wrap gap-2 items-center">
@@ -265,99 +309,108 @@ export default function Library() {
         </div>
       )}
 
-      {/* 検索結果がない場合のメッセージ */}
-      {filteredVideos.length === 0 && (
-        <div className="text-center py-10">
-          <p className="text-muted-foreground">検索結果が見つかりませんでした。</p>
+      {/* ローディング表示 */}
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
         </div>
-      )}
+      ) : (
+        <>
+          {/* 検索結果がない場合のメッセージ */}
+          {filteredVideos.length === 0 && (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">検索結果が見つかりませんでした。</p>
+            </div>
+          )}
 
-      {/* Videos Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 relative z-[1]">
-        {displayedVideos.map(video => (
-          <div
-            key={video.id}
-            className="relative overflow-hidden group rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-              <img
-                src={video.thumbnail || '/placeholder.webp'}
-                alt={video.title}
-                className="w-full h-full object-cover"
-              />
+          {/* Videos Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 relative z-[1]">
+            {displayedVideos.map(video => (
+              <div
+                key={video.id}
+                className="relative overflow-hidden group rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
+                  <img
+                    src={video.thumbnail || '/placeholder.webp'}
+                    alt={video.title}
+                    className="w-full h-full object-cover"
+                  />
 
-              {/* Gradient overlay for better text visibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
+                  {/* Gradient overlay for better text visibility */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-70"></div>
 
-              {/* Content overlay (positioned at the bottom only) */}
-              <div className="absolute bottom-0 left-0 right-0 p-2">
-                {/* Top-right badge for duration */}
-                <Badge className="absolute top-2 right-2 text-xs bg-black/60 text-white">
-                  <Clock className="w-2.5 h-2.5 mr-0.5" />
-                  {video.duration}
-                </Badge>
+                  {/* Content overlay (positioned at the bottom only) */}
+                  <div className="absolute bottom-0 left-0 right-0 p-2">
+                    {/* Top-right badge for duration */}
+                    <Badge className="absolute top-2 right-2 text-xs bg-black/60 text-white">
+                      <Clock className="w-2.5 h-2.5 mr-0.5" />
+                      {video.duration}
+                    </Badge>
 
-                {/* Status badge (only shown for non-completed) */}
-                {video.status !== '完成' && (
-                  <Badge className="absolute top-2 left-2 text-xs bg-yellow-500/80 text-black">
-                    {video.status}
-                  </Badge>
-                )}
-
-                {/* Bottom content */}
-                <div className="text-white">
-                  <h3 className="font-medium text-base line-clamp-1">{video.title}</h3>
-                  <div className="flex items-center justify-between text-xs text-white/80">
-                    <div className="flex items-center">
-                      <Calendar className="w-3 h-3 mr-1" />
-                      {video.date}
-                    </div>
-                    {video.status === '完成' && (
-                      <div className="text-xs text-white/80">♥ {video.likes}</div>
+                    {/* Status badge (only shown for non-completed) */}
+                    {video.status !== '完成' && (
+                      <Badge className="absolute top-2 left-2 text-xs bg-yellow-500/80 text-black">
+                        {video.status}
+                      </Badge>
                     )}
+
+                    {/* Bottom content */}
+                    <div className="text-white">
+                      <h3 className="font-medium text-base line-clamp-1">{video.title}</h3>
+                      <div className="flex items-center justify-between text-xs text-white/80">
+                        <div className="flex items-center">
+                          <Calendar className="w-3 h-3 mr-1" />
+                          {video.date}
+                        </div>
+                        {video.status === '完成' && (
+                          <div className="text-xs text-white/80">♥ {video.likes}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Play button overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="bg-white/90 text-black hover:bg-white rounded-full w-10 h-10 p-0"
+                    >
+                      <Play className="w-5 h-5" fill="currentColor" />
+                    </Button>
+                  </div>
+
+                  {/* Action buttons (visible on hover) - positioned at the top right */}
+                  <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full"
+                    >
+                      <Download className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full"
+                    >
+                      <Share2 className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full hover:text-red-400"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </div>
               </div>
-
-              {/* Play button overlay */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="bg-white/90 text-black hover:bg-white rounded-full w-10 h-10 p-0"
-                >
-                  <Play className="w-5 h-5" fill="currentColor" />
-                </Button>
-              </div>
-
-              {/* Action buttons (visible on hover) - positioned at the top right */}
-              <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full"
-                >
-                  <Download className="w-3 h-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full"
-                >
-                  <Share2 className="w-3 h-3" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="p-1 h-7 w-7 bg-black/40 hover:bg-black/60 text-white border-white/20 rounded-full hover:text-red-400"
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
 
       {/* Load More - 表示できる動画がまだある場合のみ表示 */}
       {displayedVideos.length < filteredVideos.length && (
