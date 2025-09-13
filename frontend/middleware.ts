@@ -67,7 +67,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // 公開ルートの場合はそのまま通す
   if (isPublicPath(pathname)) {
-    console.log('Public path accessed:', pathname)
     // トップページ（ルートパス）の場合、ログイン済みかどうかを確認
     if (pathname === '/') {
       // Cookieから認証情報を取得
