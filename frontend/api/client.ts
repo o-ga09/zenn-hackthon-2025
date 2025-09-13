@@ -1,12 +1,9 @@
 import axios from 'axios'
 import { getAuth } from 'firebase/auth'
 
-// APIのベースURLを環境変数から取得または開発環境ならローカルサーバーを使用
-const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
-
 // Axiosインスタンスを作成
 const apiClient = axios.create({
-  baseURL,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
