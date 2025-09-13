@@ -30,7 +30,11 @@ const PUBLIC_PATHS = [
  * パスが公開ルートかどうかを判定
  */
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/_next/')
+  return (
+    PUBLIC_PATHS.includes(pathname) ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/api/')
+  )
 }
 
 /**
@@ -63,6 +67,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   // 公開ルートの場合はそのまま通す
   if (isPublicPath(pathname)) {
+    console.log('Public path accessed:', pathname)
     // トップページ（ルートパス）の場合、ログイン済みかどうかを確認
     if (pathname === '/') {
       // Cookieから認証情報を取得
@@ -171,7 +176,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     // 静的ファイル・API以外のすべてのパスで認証チェック
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
     // 公開ルート・静的ファイル・API以外はすべて認証必須
     '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
     // 認証が必要なルート
