@@ -16,8 +16,10 @@ app.use('*', async (c, next) => {
   // レスポンスが既に送信されている場合は処理しない
   if (c.res.headers.get('content-type')?.includes('application/json')) {
     try {
+      // レスポンスボディをクローンして使用する
+      const clonedRes = c.res.clone()
       // レスポンスボディを取得
-      const originalBody = await c.res.json()
+      const originalBody = await clonedRes.json()
       // エラーレスポンスの場合はそのまま
       if (originalBody.error || originalBody.success === false) {
         return
