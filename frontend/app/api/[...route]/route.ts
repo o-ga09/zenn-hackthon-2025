@@ -3,6 +3,7 @@ import { handle } from 'hono/vercel'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import { prisma } from '../../../schemes/prisma/client'
+import { ulid } from 'ulid'
 
 export const runtime = 'nodejs'
 
@@ -74,19 +75,21 @@ app.post('/users', zValidator('json', createUserSchema), async c => {
   const birthdayDate = data.birthday ? new Date(data.birthday) : null
 
   try {
+    const userID = ulid()
     const user = await prisma.$transaction(async tx => {
       // ユーザー作成
       const newUser = await tx.user.create({
         data: {
-          id: data.id,
-          version: 0,
+          id: userID,
+          version: 1,
         },
       })
 
       // ユーザー詳細作成
+      const userDetailID = ulid()
       await tx.userDetail.create({
         data: {
-          id: `${data.id}_detail`,
+          id: userDetailID,
           userId: newUser.id,
           name: data.name,
           displayName: data.displayName,
