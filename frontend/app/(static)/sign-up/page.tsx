@@ -10,6 +10,8 @@ import { z } from 'zod'
 import { useCreateUser } from '@/api/userApi'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/authContext'
+import GoogleLoginPromptDialog from '@/components/dialog/GoogleLoginPromptDialog'
+import { UserInputFrontend } from '@/api/types'
 
 // フォームのバリデーションスキーマ
 const signUpSchema = z.object({
@@ -30,6 +32,7 @@ export default function SignUp() {
   const router = useRouter()
   const { currentUser } = useAuth()
   const [error, setError] = useState<string | null>(null)
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false)
 
   const {
     register,
@@ -43,24 +46,33 @@ export default function SignUp() {
     },
   })
 
+  // Googleログイン済みか確認し、未ログインならダイアログを表示
+  React.useEffect(() => {
+    if (!currentUser) {
+      setShowLoginPrompt(true)
+    }
+  }, [currentUser])
+
   const createUser = useCreateUser()
 
   const onSubmit = async (data: SignUpFormValues) => {
     if (!currentUser) {
       setError('認証情報が見つかりません。再度ログインしてください。')
+      setShowLoginPrompt(true)
       return
     }
 
     try {
       setError(null)
 
-      // Firebase IDを追加
-      const userData = {
+      // フロントエンドの形式でデータを作成
+      const userData: UserInputFrontend = {
         firebase_id: currentUser.uid,
         name: data.name,
         display_name: data.display_name,
       }
 
+      // APIが型変換を内部で行うように修正したuseCreateUserを使用
       await createUser.mutateAsync(userData)
       router.push('/dashboard') // 登録成功後ダッシュボードへリダイレクト
     } catch (err: any) {
@@ -71,6 +83,9 @@ export default function SignUp() {
 
   return (
     <div className="flex items-center justify-center h-full py-4 px-4">
+      {/* Googleログイン促進ダイアログ */}
+      <GoogleLoginPromptDialog isOpen={showLoginPrompt} onClose={() => setShowLoginPrompt(false)} />
+
       <div className="max-w-md w-full bg-white/60 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold mb-1 text-primary">プロフィール設定</h1>
