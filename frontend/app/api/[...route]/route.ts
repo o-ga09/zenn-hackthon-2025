@@ -10,10 +10,113 @@ export const runtime = 'nodejs'
 // API ルーターの作成
 const app = new Hono().basePath('/api')
 
+// レスポンス形式を統一するミドルウェア
+app.use('*', async (c, next) => {
+  await next()
+  // レスポンスが既に送信されている場合は処理しない
+  if (c.res.headers.get('content-type')?.includes('application/json')) {
+    try {
+      // レスポンスボディを取得
+      const originalBody = await c.res.json()
+      // エラーレスポンスの場合はそのまま
+      if (originalBody.error || originalBody.success === false) {
+        return
+      }
+      // 成功レスポンスの場合は形式を統一
+      const newResponse = {
+        success: true,
+        data: originalBody,
+      }
+      // 新しいレスポンスを設定
+      c.res = new Response(JSON.stringify(newResponse), {
+        headers: {
+          'content-type': 'application/json',
+        },
+        status: c.res.status,
+      })
+    } catch (e) {
+      // レスポンスの変換に失敗した場合は元のレスポンスを使用
+      console.error('Failed to transform response', e)
+    }
+  }
+})
+
 // エラーハンドリングミドルウェア
 app.onError((err, c) => {
   console.error(`${err}`)
-  return c.json({ error: err.message }, 500)
+
+  // ZodErrorの場合は特別に処理する
+  if (err.name === 'ZodError') {
+    try {
+      // エラーメッセージがJSON文字列の場合はパースする
+      const parsedErrors = JSON.parse(err.message)
+      // 人間が読みやすいフォーマットに変換
+      const formattedErrors = parsedErrors.map((error: any) => {
+        // フィールド名を取得
+        const field = error.path.join('.')
+        // エラーメッセージを生成
+        let message = ''
+
+        switch (error.code) {
+          case 'invalid_type':
+            message = `${field}は${error.expected}型である必要があります`
+            break
+          case 'required':
+            message = `${field}は必須項目です`
+            break
+          case 'too_small':
+            message = `${field}は${error.minimum}文字以上である必要があります`
+            break
+          case 'too_big':
+            message = `${field}は${error.maximum}文字以下である必要があります`
+            break
+          default:
+            message = error.message || `${field}が不正です`
+        }
+
+        return {
+          field,
+          code: error.code,
+          message,
+        }
+      })
+
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: 'ValidationError',
+            fields: formattedErrors,
+          },
+        },
+        400
+      )
+    } catch (parseError) {
+      // JSONパースに失敗した場合や想定外のフォーマットの場合
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: 'ValidationError',
+            message: 'バリデーションエラーが発生しました。入力内容を確認してください。',
+          },
+        },
+        400
+      )
+    }
+  }
+
+  // その他のエラー
+  return c.json(
+    {
+      success: false,
+      error: {
+        name: err.name || 'Error',
+        message: err.message,
+      },
+    },
+    500
+  )
 })
 
 // === ユーザー関連 API ===
@@ -256,7 +359,6 @@ app.get('/travels/:id', async c => {
 
 // 旅行作成
 const createTravelSchema = z.object({
-  id: z.string(),
   userId: z.string(),
   title: z.string(),
   description: z.string(),
@@ -270,9 +372,10 @@ app.post('/travels', zValidator('json', createTravelSchema), async c => {
   const data = c.req.valid('json') as z.infer<typeof createTravelSchema>
 
   try {
+    const travelID = ulid()
     const travel = await prisma.travel.create({
       data: {
-        id: data.id,
+        id: travelID,
         userId: data.userId,
         title: data.title,
         description: data.description,
