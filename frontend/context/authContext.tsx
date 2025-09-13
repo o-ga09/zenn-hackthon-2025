@@ -1,12 +1,6 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import {
-  signOut,
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-} from 'firebase/auth'
+import { signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { User } from '@/types/types'
 // import { useGetUserByFirebaseId } from '@/api/userApi' // React Query Hookを削除
 import axios from 'axios'
@@ -15,6 +9,7 @@ import { auth } from '@/lib/firebase'
 import { encodeUserDataForCookie } from '@/lib/utils'
 import CSRFManager from '@/lib/utils'
 import apiClient from '@/api/client'
+import { set } from 'zod'
 
 interface AuthContextType {
   user: User | null
@@ -143,7 +138,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
+        console.log('Auth state changed. Firebase user:', firebaseUser)
         if (firebaseUser) {
+          console.log('Firebase user detected:', firebaseUser)
           setFirebaseId(firebaseUser.uid)
 
           // Firebase認証完了時点で基本的なユーザー情報をクッキーに保存
@@ -196,63 +193,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => unsubscribe()
   }, [authInProgress, pathname, router])
-
-  // リダイレクト後の処理
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        // リダイレクト認証の結果を取得
-        const result = await getRedirectResult(auth)
-
-        if (result) {
-          setAuthInProgress(true)
-          const firebaseUser = result.user
-
-          // 新規登録ページからの場合はユーザー情報入力ページへ
-          if (pathname === '/register') {
-            try {
-              // Firebase認証後にuidを使ってユーザー情報を取得
-              setFirebaseId(firebaseUser.uid)
-
-              // APIリクエストを直接実行
-              try {
-                const userData = await fetchUserByFirebaseId(firebaseUser.uid)
-
-                // ユーザーデータの確認
-                if (userData) {
-                  // ユーザーが既に存在する場合は/travelsにリダイレクト
-                  router.push('/travels')
-                } else {
-                  // データがない場合は、sign-upページに進む
-                  router.push('/sign-up')
-                }
-              } catch (error: any) {
-                const statusCode = error.response?.status
-
-                // 404エラーの場合は新規ユーザーと判断
-                if (statusCode === 404) {
-                  router.push('/sign-up')
-                }
-              }
-            } catch (error) {
-              console.error('Error after redirect:', error)
-            }
-          } else {
-            // ログインページなどからの場合は直接トップページへ
-            router.push('/travels')
-          }
-
-          setAuthInProgress(false)
-        }
-      } catch (error) {
-        console.error('Error processing redirect result:', error)
-        setAuthInProgress(false)
-      }
-    }
-
-    // ページロード時に一度だけ実行
-    handleRedirectResult()
-  }, [pathname, router])
 
   // APIユーザーデータの変更を監視
   useEffect(() => {
@@ -445,7 +385,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const provider = new GoogleAuthProvider()
 
       // Googleリダイレクト認証を開始
-      await signInWithRedirect(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
+
+      setFirebaseId(user.uid)
+      // 少し待機してAPIリクエストが完了するのを待つ
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // apiUserとapiErrorの最新の状態を取得
+      const error = apiError
+
+      if (apiUser) {
+        // ユーザーが既に存在する場合は/dashboardにリダイレクト
+        router.push('/dashboard')
+      } else if (error) {
+        // @ts-ignore
+        const statusCode = error.response?.status
+
+        // 404エラーの場合は新規ユーザーと判断
+        if (statusCode === 404) {
+          router.push('/sign-up')
+        } else {
+          // その他のエラーは上位に投げる
+          throw error
+        }
+      } else {
+        // データもエラーもない場合は、APIリクエストがまだ完了していない可能性がある
+        // sign-upページに進む（APIリクエストが完了し、ユーザーが存在しない場合はそのままになる）
+        router.push('/sign-up')
+      }
 
       // 注意: ここで処理は中断され、リダイレクト後に続行されます
       // リダイレクト結果は、onAuthStateChangedで自動的に処理されます
