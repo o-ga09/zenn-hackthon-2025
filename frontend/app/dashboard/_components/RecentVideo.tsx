@@ -3,9 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Play, Calendar, Download, Share2 } from 'lucide-react'
 import React from 'react'
-import { useGetTravelsByUserId } from '@/api/travelApi'
+import { useGetTravelsByUserId, useUpdateTravel } from '@/api/travelApi'
 import { useAuth } from '@/context/authContext'
-import { Travel } from '@/api/types'
+import { Travel, TravelInput } from '@/api/types'
 import TravelDetailSheet from './TravelDetailSheet'
 
 export default function RecentVideo() {
@@ -13,6 +13,7 @@ export default function RecentVideo() {
   const userId = user?.id || ''
   const [selectedTravel, setSelectedTravel] = React.useState<Travel | null>(null)
   const [isSheetOpen, setIsSheetOpen] = React.useState(false)
+  const { mutate: updateTravel } = useUpdateTravel(selectedTravel?.id || '')
 
   const { data: travelsData, isLoading: isTravelsLoading } = useGetTravelsByUserId(userId)
   const travels = travelsData?.travels || []
@@ -40,6 +41,12 @@ export default function RecentVideo() {
       2,
       '0'
     )}`
+  }
+
+  const onSave = async (updatedTravel: Partial<TravelInput>) => {
+    await updateTravel({
+      ...updatedTravel,
+    })
   }
 
   return (
@@ -138,6 +145,7 @@ export default function RecentVideo() {
         travel={selectedTravel}
         isOpen={isSheetOpen}
         onOpenChange={setIsSheetOpen}
+        onSave={onSave}
       />
     </div>
   )
