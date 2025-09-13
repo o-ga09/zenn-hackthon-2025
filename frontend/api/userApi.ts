@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import apiClient from './client'
-import { User, UserInput, UsersResponse } from './types'
+import { User, UserInput, UserInputFrontend, UsersResponse } from './types'
 
 // キャッシュのキー
 export const USERS_QUERY_KEY = ['users']
@@ -59,8 +59,22 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (userData: UserInput): Promise<User> => {
-      const response = await apiClient.post('/users', userData)
+    mutationFn: async (userData: UserInput | UserInputFrontend): Promise<User> => {
+      // フロントエンドの形式をAPIの形式に変換
+      const apiUserData =
+        'firebase_id' in userData
+          ? {
+              uid: userData.firebase_id,
+              id: userData.name, // フォームのname = ID
+              name: userData.name, // nameフィールドも送信
+              displayName: userData.display_name,
+              ...(userData.image_data && { image_data: userData.image_data }),
+              ...(userData.birth_day && { birth_day: userData.birth_day }),
+              ...(userData.gender && { gender: userData.gender }),
+            }
+          : userData
+
+      const response = await apiClient.post('/users', apiUserData)
       return response.data
     },
     // ミューテーション成功後にユーザー一覧のキャッシュを無効化

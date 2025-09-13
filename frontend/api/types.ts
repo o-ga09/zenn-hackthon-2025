@@ -12,9 +12,20 @@ export interface User {
 }
 
 export interface UserInput {
-  firebase_id: string
-  display_name: string
+  uid: string
+  id: string
   name: string
+  displayName: string
+  image_data?: string
+  birth_day?: string
+  gender?: string
+}
+
+// フロントエンド内部での表現用
+export interface UserInputFrontend {
+  firebase_id: string
+  name: string
+  display_name: string
   image_data?: string
   birth_day?: string
   gender?: string
