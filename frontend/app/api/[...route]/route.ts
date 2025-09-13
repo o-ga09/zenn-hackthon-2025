@@ -325,7 +325,7 @@ app.delete('/users/:id', async c => {
 // === 旅行関連 API ===
 // 旅行一覧取得
 app.get('/travels', async c => {
-  const userId = c.req.header('X-Tavinikkiy-User')
+  const userId = c.req.header('X-Tavinikkiy-User-Id')
 
   const where = userId ? { userId, deleteDatetime: null } : { deleteDatetime: null }
 
