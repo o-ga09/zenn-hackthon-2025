@@ -2,14 +2,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { User } from '@/types/types'
-// import { useGetUserByFirebaseId } from '@/api/userApi' // React Query Hookを削除
 import axios from 'axios'
 import { useRouter, usePathname } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { encodeUserDataForCookie } from '@/lib/utils'
 import CSRFManager from '@/lib/utils'
 import apiClient from '@/api/client'
-import { set } from 'zod'
 
 interface AuthContextType {
   user: User | null
@@ -61,7 +59,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const response = await apiClient.get(`/firebaseUsers/${fbId}`)
-      setApiUser(response.data)
+      console.log('Fetched API user data:', response.data)
+      setApiUser({
+        id: response.data.user.id,
+        userID: response.data.user.userId,
+        version: response.data.user.version,
+        uid: fbId,
+        username: response.data.user.username,
+        displayname: response.data.user.displayname,
+        photoURL: response.data.user.photoURL,
+        email: response.data.user.email,
+        birthDay: response.data.user.birthDay,
+      })
       return response.data
     } catch (error) {
       setApiError(error)
@@ -77,37 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       fetchUserByFirebaseId(firebaseId)
     }
   }, [firebaseId])
-
-  // 注: AxiosProviderでインターセプターを使用するため、ここでのAxiosヘッダー設定は削除
-  // トークン関連のデバッグ情報を記録
-  useEffect(() => {
-    const logAuthStatus = async () => {
-      try {
-        const currentUser = auth.currentUser
-        if (currentUser) {
-        } else {
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error)
-      }
-    }
-    logAuthStatus()
-  }, [user])
-
-  // ローカルストレージから初期ユーザーの復元
-  useEffect(() => {
-    const storedUser = localStorage.getItem('tavinikkiy-user')
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser)
-        // ローカルストレージから復元したユーザーを一時的にセット
-        // FirebaseAuthの状態が確認されるまでの間、UIに表示するため
-        setUser(parsedUser)
-      } catch (error) {
-        console.error('Failed to parse stored user:', error)
-      }
-    }
-  }, [])
 
   // 公開ルートかどうかを判定するヘルパー関数
   const isPublicRoute = (path: string): boolean => {
@@ -138,9 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        console.log('Auth state changed. Firebase user:', firebaseUser)
         if (firebaseUser) {
-          console.log('Firebase user detected:', firebaseUser)
           setFirebaseId(firebaseUser.uid)
 
           // Firebase認証完了時点で基本的なユーザー情報をクッキーに保存
@@ -214,16 +190,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             router.push('/sign-up')
           }
         } else if (apiUser) {
-          // APIユーザーデータが存在する場合
-          const userData = apiUser as any // 型アサーションを使用して型エラーを回避
-
+          console.log('API User data fetched:', apiUser)
           // プロフィール画像の取得ロジックを修正
           // APIから画像データが取得できる場合はそれを優先し、取得できない場合はFirebaseのプロフィール画像を使用
           let profileImage = ''
 
           // 1. APIからのアップロードされた画像データを最優先（Base64形式）
-          if (userData.image_data && userData.image_data.length > 0) {
-            profileImage = `data:image/jpeg;base64,${userData.image_data}`
+          if (apiUser.photoURL && apiUser.photoURL.length > 0) {
+            profileImage = apiUser.photoURL
           }
           // 2. Firebase Authからのプロフィール画像を使用（ない場合はデフォルト画像が使用される）
           else if (firebaseUser.photoURL) {
@@ -232,20 +206,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           // 更新されたユーザー情報を作成（内部型に変換）
           const updatedUser: User = {
-            id: userData.id, // APIから取得した正式なユーザーID
-            version: userData.version || 1,
+            id: apiUser.id,
+            userID: apiUser.userID,
+            version: apiUser.version || 1,
             uid: firebaseId,
-            username: userData.name || firebaseUser.displayName || '',
-            displayname: userData.display_name || firebaseUser.displayName || '',
+            username: apiUser.username || firebaseUser.displayName || '',
+            displayname: apiUser.displayname || firebaseUser.displayName || '',
             photoURL: profileImage,
-            email: firebaseUser.email || '',
-            birthDay: userData.birth_day ?? undefined,
-            gender: userData.gender || '1',
+            email: firebaseUser.email,
+            birthDay: apiUser.birthDay,
+            gender: apiUser.gender,
           }
 
           // ローカルストレージと状態を更新
+          console.log('Setting user data in auth context:', updatedUser)
           setUser(updatedUser)
-          localStorage.setItem('tavinikkiy-user', JSON.stringify(updatedUser))
 
           // middlewareとの連携のためCookieにもユーザー情報を保存（詳細版で更新）
           if (typeof document !== 'undefined') {
