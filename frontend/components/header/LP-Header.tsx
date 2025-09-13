@@ -1,3 +1,4 @@
+'use client'
 import { Menu, Video, X } from 'lucide-react'
 import React, { useState } from 'react'
 import { Button } from '../ui/button'
@@ -5,12 +6,21 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FcGoogle } from 'react-icons/fc'
 import { useAuth } from '@/context/authContext'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function LPHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { user, googleLogin } = useAuth()
+  const { user, googleLogin, logout } = useAuth()
+  const router = useRouter()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -26,6 +36,15 @@ export default function LPHeader() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout error:', error)
     }
   }
 
@@ -55,22 +74,55 @@ export default function LPHeader() {
                   ダッシュボードへ
                 </Button>
               </Link>
-              <Link href="/profile">
-                <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   {user.photoURL ? (
-                    <img
+                    <Image
                       src={user.photoURL}
-                      alt="ユーザーアイコン"
-                      className="w-8 h-8 rounded-full border"
+                      alt="User Profile"
+                      width={40}
+                      height={40}
+                      className="rounded-full"
                     />
                   ) : (
                     <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
                       {user.displayname ? user.displayname.charAt(0) : 'U'}
                     </span>
                   )}
-                  <span className="hidden md:inline text-sm font-medium">{user.displayname}</span>
-                </Button>
-              </Link>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[200px] bg-white rounded-md shadow-lg p-2 flex flex-col gap-1 z-50"
+                >
+                  {user ? (
+                    <>
+                      <DropdownMenuItem asChild className="focus:bg-gray-100 focus:outline-none">
+                        <Link
+                          href={`/settings/${user.username}`}
+                          className="w-full px-3 py-2 text-sm"
+                        >
+                          ユーザー設定
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem className="focus:bg-gray-100 focus:outline-none text-gray-400 cursor-not-allowed">
+                      <span className="w-full px-3 py-2 text-sm">設定を読み込み中...</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className="focus:bg-gray-100 focus:outline-none text-red-500"
+                    onSelect={e => {
+                      e.preventDefault()
+                      handleLogout()
+                    }}
+                  >
+                    <button onClick={handleLogout} className="w-full px-3 py-2 text-sm text-left">
+                      ログアウト
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <button

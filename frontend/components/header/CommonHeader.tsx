@@ -4,9 +4,28 @@ import { Button } from '../ui/button'
 import Link from 'next/link'
 import { Bell } from 'lucide-react'
 import { useAuth } from '@/context/authContext'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 export default function CommonHeader() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
+
   return (
     <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -46,22 +65,55 @@ export default function CommonHeader() {
                   ダッシュボードへ
                 </Button>
               </Link>
-              <Link href="/profile">
-                <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="ユーザーアイコン"
-                      className="w-8 h-8 rounded-full border"
+                    <Image
+                      src={user?.photoURL || '/no-avatar.webp'}
+                      alt="User Profile"
+                      width={40}
+                      height={40}
+                      className="rounded-full"
                     />
                   ) : (
                     <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
                       {user.displayname ? user.displayname.charAt(0) : 'U'}
                     </span>
                   )}
-                  <span className="hidden md:inline text-sm font-medium">{user.displayname}</span>
-                </Button>
-              </Link>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-[200px] bg-white rounded-md shadow-lg p-2 flex flex-col gap-1 z-50"
+                >
+                  {user ? (
+                    <>
+                      <DropdownMenuItem asChild className="focus:bg-gray-100 focus:outline-none">
+                        <Link
+                          href={`/settings/${user.username}`}
+                          className="w-full px-3 py-2 text-sm"
+                        >
+                          ユーザー設定
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem className="focus:bg-gray-100 focus:outline-none text-gray-400 cursor-not-allowed">
+                      <span className="w-full px-3 py-2 text-sm">設定を読み込み中...</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    className="focus:bg-gray-100 focus:outline-none text-red-500"
+                    onSelect={e => {
+                      e.preventDefault()
+                      handleLogout()
+                    }}
+                  >
+                    <button onClick={handleLogout} className="w-full px-3 py-2 text-sm text-left">
+                      ログアウト
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
             <></>
