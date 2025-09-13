@@ -43,6 +43,19 @@ app.get('/users/:id', async c => {
   return c.json({ user })
 })
 
+// FirebaseAuthユーザー詳細取得
+app.get('/firebaseUsers/:id', async c => {
+  const id = c.req.param('id')
+  const user = await prisma.userDetail.findFirst({
+    where: { uid: id, deleteDatetime: null },
+  })
+  if (!user) {
+    return c.json({ error: 'User not found' }, 404)
+  }
+
+  return c.json({ user })
+})
+
 // ユーザー作成
 const createUserSchema = z.object({
   id: z.string(),
