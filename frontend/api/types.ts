@@ -53,3 +53,36 @@ export interface SocialAccount {
   tiktok_url: string
   youtube_url: string
 }
+
+// 旅行情報関連の型定義
+export interface Travel {
+  id: string
+  userId: string
+  title: string
+  description: string
+  startDate: string
+  endDate: string
+  sharedId: string
+  thumbnail: string
+  created_at: string
+  updated_at: string
+  version: number
+}
+
+export interface TravelInput {
+  id?: string // サーバー側で生成される場合はオプショナル
+  userId: string
+  title: string
+  description: string
+  startDate: string
+  endDate: string
+  sharedId: string
+  thumbnail: string
+}
+
+export interface TravelsResponse {
+  travels: Travel[]
+  total: number
+  message?: string
+  next_page_token?: string
+}
