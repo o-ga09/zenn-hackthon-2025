@@ -10,7 +10,7 @@ export default function LPHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { googleLogin } = useAuth()
+  const { user, googleLogin } = useAuth()
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
@@ -48,15 +48,41 @@ export default function LPHeader() {
 
         {/* デスクトップメニュー */}
         <div className="hidden md:flex items-center space-x-4">
-          <button
-            type="button"
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            <FcGoogle className="h-5 w-5" />
-            Googleアカウントでログイン
-          </button>
+          {user ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="outline" className="border rounded px-4 py-2 hover:bg-gray-50">
+                  ダッシュボードへ
+                </Button>
+              </Link>
+              <Link href="/profile">
+                <Button variant="ghost" className="flex items-center gap-2 px-3 py-2">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="ユーザーアイコン"
+                      className="w-8 h-8 rounded-full border"
+                    />
+                  ) : (
+                    <span className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
+                      {user.displayname ? user.displayname.charAt(0) : 'U'}
+                    </span>
+                  )}
+                  <span className="hidden md:inline text-sm font-medium">{user.displayname}</span>
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+            >
+              <FcGoogle className="h-5 w-5" />
+              Googleアカウントでログイン
+            </button>
+          )}
         </div>
 
         {/* モバイルメニューボタン */}
