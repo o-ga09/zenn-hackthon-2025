@@ -5,6 +5,8 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { TravelFormValues, UploadStep, travelFormSchema } from './form-schema'
 import { useRouter } from 'next/navigation'
+import { useCreateTravel } from '@/api/travelApi'
+import { useAuth } from '@/context/authContext'
 
 interface UploadFormContextProps {
   step: UploadStep
@@ -35,11 +37,14 @@ interface UploadFormProviderProps {
 
 export function UploadFormProvider({ children }: UploadFormProviderProps) {
   const router = useRouter()
+  const { user } = useAuth()
   const [step, setStep] = useState<UploadStep>('upload')
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
   const [isGenerating, setIsGenerating] = useState(false)
   const [generationError, setGenerationError] = useState<string | null>(null)
+
+  const { mutateAsync: createTravel } = useCreateTravel()
 
   const methods = useForm<TravelFormValues>({
     resolver: zodResolver(travelFormSchema),
@@ -86,16 +91,43 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
       // フォームデータの取得
       const formData = methods.getValues()
 
-      console.log('動画生成処理を開始', {
-        travelTitle: formData.travelTitle,
-        travelDate: formData.travelDate,
-        travelLocation: formData.travelLocation,
-        travelDescription: formData.travelDescription,
-        photosCount: uploadedFiles.length,
+      // ユーザーが認証されているか確認
+      if (!user || !user.id) {
+        throw new Error('ユーザーが認証されていません。再度ログインしてください。')
+      }
+
+      // 現在の日時を文字列で取得（一意のIDとして使用）
+      const currentTimeStr = new Date().toISOString()
+
+      // サムネイル画像のURLまたはデータURIを生成（仮の実装）
+      // 実際の実装では、アップロードした写真の1枚目をサムネイルとして使用するか
+      // プレースホルダー画像を使用する
+      const thumbnailUrl = '/placeholder.webp' // 仮のプレースホルダー画像パス
+      console.log('サムネイルURL:', user.userID)
+
+      // 1. 旅行情報を保存
+      await createTravel({
+        userId: user.userID,
+        title: formData.travelTitle,
+        description: formData.travelDescription || '',
+        startDate: formData.travelDate,
+        endDate: formData.travelDate,
+        sharedId: `share_${currentTimeStr}`,
+        thumbnail: thumbnailUrl,
       })
 
+      // 2. 写真ファイルをアップロード
+      // 実際のAPIが実装されたら、以下のように写真をアップロードし、処理をリクエストするコードを追加
+      // const formDataForUpload = new FormData()
+      // formDataForUpload.append('travel_id', travelData.id)
+      //
+      // uploadedFiles.forEach((file, index) => {
+      //   formDataForUpload.append(`photos[${index}]`, file)
+      // })
+      //
+      // await apiClient.post('/videos/generate', formDataForUpload)
+
       // モックAPI呼び出し - 実際のAPIが実装されたらここを置き換える
-      // 実際の実装では、写真ファイルをアップロードし、処理をリクエストするコードが入ります
       await new Promise(resolve => setTimeout(resolve, 2000)) // 2秒待機してAPIリクエストをシミュレート
 
       // 成功した場合、動画ページへリダイレクト
@@ -103,7 +135,11 @@ export function UploadFormProvider({ children }: UploadFormProviderProps) {
     } catch (error) {
       // エラーハンドリング
       console.error('動画生成中にエラーが発生しました', error)
-      setGenerationError('動画生成中にエラーが発生しました。もう一度お試しください。')
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : '動画生成中にエラーが発生しました。もう一度お試しください。'
+      setGenerationError(errorMessage)
     } finally {
       setIsGenerating(false)
     }
